@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import {
@@ -14,6 +14,7 @@ import {
     User,
     Share2,
     Loader2,
+    Send,
 } from "lucide-react";
 
 interface ListingDetail {
@@ -40,14 +41,24 @@ interface OwnerProfile {
 
 export default function ListingDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const id = params?.id as string;
 
     const [listing, setListing] = useState<ListingDetail | null>(null);
     const [owner, setOwner] = useState<OwnerProfile | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
 
+    const [msgText, setMsgText] = useState("");
+    const [sendingMsg, setSendingMsg] = useState(false);
+    const [msgSent, setMsgSent] = useState(false);
+
     useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            setCurrentUserId(data.user?.id || null);
+        });
+
         if (!id) return;
 
         const fetchDetails = async () => {
@@ -77,6 +88,30 @@ export default function ListingDetailPage() {
         navigator.clipboard.writeText(window.location.href);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
+    };
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentUserId) {
+            router.push("/login");
+            return;
+        }
+        if (!listing || !msgText.trim()) return;
+
+        setSendingMsg(true);
+        const { error } = await supabase.from("messages").insert({
+            listing_id: listing.id,
+            sender_id: currentUserId,
+            receiver_id: listing.user_id,
+            content: msgText.trim(),
+        });
+
+        setSendingMsg(false);
+        if (!error) {
+            setMsgText("");
+            setMsgSent(true);
+            setTimeout(() => setMsgSent(false), 3000);
+        }
     };
     if (loading) {
         return (
@@ -221,6 +256,40 @@ export default function ListingDetailPage() {
                                     <span>اتصال مباشر ({listing.phone})</span>
                                 </a>
                             </div>
+
+                            {currentUserId !== listing.user_id && (
+                                <form onSubmit={handleSendMessage} className="border-t border-slate-100 pt-4 mb-5">
+                                    <label className="block text-xs font-bold text-slate-700 mb-2">
+                                        أرسل رسالة داخلية للمُعلن
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="اكتب استفسارك هنا..."
+                                            value={msgText}
+                                            onChange={(e) => setMsgText(e.target.value)}
+                                            className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={sendingMsg}
+                                            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 transition"
+                                        >
+                                            {sendingMsg ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Send className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    </div>
+                                    {msgSent && (
+                                        <p className="text-xs text-emerald-600 font-semibold mt-2">
+                                            تم إرسال رسالتك بنجاح! ستجد الرد في صفحة الرسائل.
+                                        </p>
+                                    )}
+                                </form>
+                            )}
 
                             <div className="border-t border-slate-100 pt-4 flex items-center gap-3">
                                 <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
