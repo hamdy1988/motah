@@ -3,29 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
-
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
-
-const SHIBIN_AREAS = [
-    "مدينة شبين القناطر",
-    "كفر شبين",
-    "طحانوب",
-    "الأحراز",
-    "الجعافرة",
-    "القشيش",
-    "منية شبين",
-    "نوى",
-    "تل بني تميم",
-    "القلزم",
-    "كفر طحا",
-    "الشوبك",
-    "الحزانية",
-    "العطارة",
-    "كفر الدير",
-    "المريج",
-];
 
 export default function AddListingPage() {
     const router = useRouter();
@@ -42,6 +22,7 @@ export default function AddListingPage() {
     const [phone, setPhone] = useState("");
     const [specsText, setSpecsText] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             if (!data.user) {
@@ -163,7 +144,7 @@ export default function AddListingPage() {
                                 onChange={(e) => setArea(e.target.value)}
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                             >
-                                {SHIBIN_AREAS.map((a) => (
+                                {SHIBIN_VILLAGES.map((a) => (
                                     <option key={a} value={a}>{a}</option>
                                 ))}
                             </select>
