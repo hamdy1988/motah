@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import {
   Search,
   MapPin,
@@ -13,6 +15,7 @@ import {
   MessageCircle,
   Calendar,
   SlidersHorizontal,
+  LogOut,
 } from "lucide-react";
 
 const SHIBIN_AREAS = [
@@ -35,78 +38,66 @@ const SHIBIN_AREAS = [
   "المريج",
 ];
 
-const SAMPLE_LISTINGS = [
-  {
-    id: 1,
-    title: "شقة سوبر لوكس 140 متر أمام محطة شبين القناطر",
-    type: "rent",
-    category: "real_estate",
-    price: "3,500",
-    period: "شهرياً",
-    area: "مدينة شبين القناطر",
-    specs: ["3 غرف", "2 حمام", "الدور الثالث"],
-    verified: true,
-    image: "https://unsplash.com",
-  },
-  {
-    id: 2,
-    title: "هيونداي إلنترا AD موديل 2020 فابريكا بالكامل",
-    type: "sale",
-    category: "vehicles",
-    price: "680,000",
-    period: "",
-    area: "طحانوب",
-    specs: ["أوتوماتيك", "85 ألف كم", "رخصة سنة"],
-    verified: true,
-    image: "https://unsplash.com",
-  },
-  {
-    id: 3,
-    title: "مولد كهرباء كاتم للصوت 20 كيلو للمناسبات والمزارع",
-    type: "rent",
-    category: "equipment",
-    price: "600",
-    period: "يومياً",
-    area: "كفر شبين",
-    specs: ["ديزل", "صيانة دورية", "توصيل متاح"],
-    verified: false,
-    image: "https://unsplash.com",
-  },
-  {
-    id: 4,
-    title: "أرض مباني 200 متر على شارع رئيسي بعرض 12 متر",
-    type: "sale",
-    category: "real_estate",
-    price: "1,200,000",
-    period: "",
-    area: "الأحراز",
-    specs: ["واجهة 10م", "كاملة المرافق", "عقد مسجل"],
-    verified: true,
-    image: "https://unsplash.com",
-  },
-];
+interface Listing {
+  id: string;
+  title: string;
+  listing_type: "rent" | "sale";
+  category: string;
+  price: number;
+  rent_period: string | null;
+  area: string;
+  phone: string;
+  specs: string[];
+  image_url: string;
+  is_verified: boolean;
+}
+
 export default function HomePage() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
   const [selectedType, setSelectedType] = useState<"all" | "sale" | "rent">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedArea, setSelectedArea] = useState<string>(SHIBIN_AREAS[0]);
-
-
+  const [selectedArea, setSelectedArea] = useState<string>("كل شبين القناطر وقراها");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredListings = SAMPLE_LISTINGS.filter((item) => {
-    const matchType = selectedType === "all" || item.type === selectedType;
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email || null);
+    });
+
+    const fetchListings = async () => {
+      const { data } = await supabase
+        .from("listings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (data) setListings(data);
+      setLoading(false);
+    };
+
+    fetchListings();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUserEmail(null);
+  };
+
+  const filteredListings = listings.filter((item) => {
+    const matchType = selectedType === "all" || item.listing_type === selectedType;
     const matchCat = selectedCategory === "all" || item.category === selectedCategory;
     const matchArea =
       selectedArea === "كل شبين القناطر وقراها" || item.area === selectedArea;
     const matchSearch = item.title.includes(searchQuery);
     return matchType && matchCat && matchArea && matchSearch;
   });
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-xl shadow-sm">
               م<span className="text-emerald-400">.</span>
             </div>
@@ -118,16 +109,34 @@ export default function HomePage() {
                 Motah • شبين القناطر
               </span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-3">
-            <button className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2">
-              تسجيل الدخول
-            </button>
-            <button className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition">
+            {userEmail ? (
+              <button
+                onClick={handleLogout}
+                title="تسجيل الخروج"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-red-600 px-3 py-2 transition"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">خروج</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-slate-700 hover:text-slate-900 px-3 py-2"
+              >
+                تسجيل الدخول
+              </Link>
+            )}
+
+            <Link
+              href="/add-listing"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition"
+            >
               <PlusCircle className="w-4 h-4" />
               <span>أضف إعلانك مجاناً</span>
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -235,102 +244,120 @@ export default function HomePage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900">أحدث العروض في شبين القناطر</h2>
             <p className="text-sm text-slate-500 mt-1">
-              عرض {filteredListings.length} إعلان متاح حالياً
+              {loading ? "جاري تحميل الإعلانات..." : `عرض ${filteredListings.length} إعلان متاح حالياً`}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredListings.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col group"
+        {!loading && filteredListings.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <p className="text-lg font-bold text-slate-800 mb-2">لا توجد إعلانات مطابقة لبحثك حالياً</p>
+            <p className="text-sm text-slate-500 mb-6">كن أول من يضيف إعلاناً في هذا القسم أو هذه القرية!</p>
+            <Link
+              href="/add-listing"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-3 rounded-xl transition"
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                />
-                <span
-                  className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${item.type === "rent" ? "bg-emerald-600" : "bg-blue-600"
-                    }`}
-                >
-                  {item.type === "rent" ? "للإيجار" : "للبيع"}
-                </span>
-              </div>
-
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                    <span className="flex items-center gap-1 font-medium text-slate-700">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                      {item.area}
-                    </span>
-                    {item.verified && (
-                      <span className="flex items-center gap-1 text-blue-600 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        موثق
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="font-bold text-slate-900 text-base line-clamp-2 mb-3 group-hover:text-emerald-700 transition">
-                    {item.title}
-                  </h3>
-
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {item.specs.map((spec, idx) => (
-                      <span
-                        key={idx}
-                        className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md"
-                      >
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
+              <PlusCircle className="w-4 h-4" />
+              <span>أضف أول إعلان الآن</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredListings.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col group"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  />
+                  <span
+                    className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${item.listing_type === "rent" ? "bg-emerald-600" : "bg-blue-600"
+                      }`}
+                  >
+                    {item.listing_type === "rent" ? "للإيجار" : "للبيع"}
+                  </span>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100">
-                  <div className="flex items-baseline justify-between mb-3">
-                    <div>
-                      <span className="text-lg font-extrabold text-slate-900">
-                        {item.price} ج.م
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                      <span className="flex items-center gap-1 font-medium text-slate-700">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                        {item.area}
                       </span>
-                      {item.period && (
-                        <span className="text-xs text-slate-500 mr-1">/ {item.period}</span>
+                      {item.is_verified && (
+                        <span className="flex items-center gap-1 text-blue-600 font-medium">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          موثق
+                        </span>
                       )}
+                    </div>
+
+                    <h3 className="font-bold text-slate-900 text-base line-clamp-2 mb-3 group-hover:text-emerald-700 transition">
+                      {item.title}
+                    </h3>
+
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {item.specs?.map((spec, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md"
+                        >
+                          {spec}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      title="حجز موعد"
-                      className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition"
-                    >
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>حجز</span>
-                    </button>
-                    <button
-                      title="محادثة داخلية"
-                      className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>رسالة</span>
-                    </button>
-                    <button
-                      title="اتصال مباشر"
-                      className="flex items-center justify-center gap-1 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold transition"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>اتصال</span>
-                    </button>
+                  <div className="pt-3 border-t border-slate-100">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <div>
+                        <span className="text-lg font-extrabold text-slate-900">
+                          {Number(item.price).toLocaleString()} ج.م
+                        </span>
+                        {item.rent_period && (
+                          <span className="text-xs text-slate-500 mr-1">/ {item.rent_period}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <a
+                        href={`https://wa.me{item.phone}?text=${encodeURIComponent(`مرحباً، أود حجز موعد بخصوص إعلانك على منصة مُتاح: ${item.title}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>حجز</span>
+                      </a>
+                      <a
+                        href={`https://wa.me{item.phone}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>واتساب</span>
+                      </a>
+                      <a
+                        href={`tel:${item.phone}`}
+                        className="flex items-center justify-center gap-1 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold transition"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>اتصال</span>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-center text-sm">
