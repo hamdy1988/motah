@@ -10,6 +10,7 @@ import {
     PlusCircle,
     MapPin,
     Eye,
+    Edit3,
     Loader2,
 } from "lucide-react";
 
@@ -79,7 +80,7 @@ export default function MyListingsPage() {
                         </Link>
                         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">إعلاناتي المنشورة</h1>
                         <p className="text-sm text-slate-500 mt-1">
-                            تحكم في إعلاناتك واحذف ما تم بيعه أو تأجيره بسهولة
+                            تحكم في إعلاناتك وعدّل أسعارها أو احذف ما تم بيعه أو تأجيره بسهولة
                         </p>
                     </div>
 
@@ -155,23 +156,31 @@ export default function MyListingsPage() {
                                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
                                     <Link
                                         href={`/listing/${item.id}`}
-                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"
                                     >
                                         <Eye className="w-4 h-4" />
                                         <span>عرض</span>
                                     </Link>
 
+                                    <Link
+                                        href={`/edit-listing/${item.id}`}
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold transition"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                        <span>تعديل</span>
+                                    </Link>
+
                                     <button
                                         onClick={() => handleDelete(item.id)}
                                         disabled={deletingId === item.id}
-                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition"
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition"
                                     >
                                         {deletingId === item.id ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <Trash2 className="w-4 h-4" />
                                         )}
-                                        <span>حذف الإعلان</span>
+                                        <span>حذف</span>
                                     </button>
                                 </div>
                             </div>
