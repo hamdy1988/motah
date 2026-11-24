@@ -17,6 +17,7 @@ import {
   Calendar,
   SlidersHorizontal,
   LogOut,
+  LayoutList,
 } from "lucide-react";
 
 const SHIBIN_AREAS = ["كل شبين القناطر وقراها", ...SHIBIN_VILLAGES];
@@ -94,16 +95,26 @@ export default function HomePage() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {userEmail ? (
-              <button
-                onClick={handleLogout}
-                title="تسجيل الخروج"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-red-600 px-3 py-2 transition"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">خروج</span>
-              </button>
+              <>
+                <Link
+                  href="/my-listings"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-3 py-2 rounded-xl transition"
+                >
+                  <LayoutList className="w-4 h-4 text-emerald-600" />
+                  <span>إعلاناتي</span>
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  title="تسجيل الخروج"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-red-600 px-2 py-2 transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden md:inline">خروج</span>
+                </button>
+              </>
             ) : (
               <Link
                 href="/login"
@@ -118,7 +129,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>أضف إعلانك مجاناً</span>
+              <span>أضف إعلانك</span>
             </Link>
           </div>
         </div>
