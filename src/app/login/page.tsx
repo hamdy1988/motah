@@ -2,28 +2,10 @@
 
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { SHIBIN_VILLAGES } from "@/lib/areas";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Phone, Lock, User, MapPin, Loader2 } from "lucide-react";
-
-const SHIBIN_AREAS = [
-    "مدينة شبين القناطر",
-    "كفر شبين",
-    "طحانوب",
-    "الأحراز",
-    "الجعافرة",
-    "القشيش",
-    "منية شبين",
-    "نوى",
-    "تل بني تميم",
-    "القلزم",
-    "كفر طحا",
-    "الشوبك",
-    "الحزانية",
-    "العطارة",
-    "كفر الدير",
-    "المريج",
-];
 
 export default function LoginPage() {
     const router = useRouter();
@@ -131,7 +113,7 @@ export default function LoginPage() {
                                         onChange={(e) => setArea(e.target.value)}
                                         className="w-full pr-10 pl-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium"
                                     >
-                                        {SHIBIN_AREAS.map((a) => (
+                                        {SHIBIN_VILLAGES.map((a) => (
                                             <option key={a} value={a}>{a}</option>
                                         ))}
                                     </select>

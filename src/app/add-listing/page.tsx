@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { SHIBIN_VILLAGES } from "@/lib/areas";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
