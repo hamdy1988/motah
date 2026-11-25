@@ -19,6 +19,10 @@ import {
   LogOut,
   LayoutList,
   MessageSquare,
+  Store,
+  Stethoscope,
+  Hammer,
+  Tag,
 } from "lucide-react";
 
 const SHIBIN_AREAS = ["كل شبين القناطر وقراها", ...SHIBIN_VILLAGES];
@@ -144,20 +148,65 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white py-14 px-4">
-        <div className="max-w-5xl mx-auto text-center">
+      <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4">
+        <div className="max-w-6xl mx-auto text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mb-4">
             <MapPin className="w-3.5 h-3.5" />
             منصة أهالي شبين القناطر وجميع القرى التابعة لها
           </span>
-          <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight mb-4">
-            كل ما تحتاجه للبيع أو الإيجار..{" "}
+          <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight mb-3">
+            كل خدمات مدينتك وقريتك..{" "}
             <span className="text-emerald-400">مُتاح</span> بين يديك
           </h1>
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-            تواصل مباشرة مع الملاك والبائعين في مدينتك وقريتك بدون وسطاء. عقارات، سيارات، ومعدات في مكان واحد.
+          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto mb-8">
+            اختر القسم الذي تحتاجه: بيع وإيجار مباشر، تصفح المتاجر والمحلات، احجز دورك في العيادة، أو تواصل مع أمهر الصنايعية.
           </p>
 
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto mb-8">
+            <a
+              href="#market-section"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 sm:p-5 rounded-2xl shadow-lg transition flex flex-col items-center text-center border border-emerald-400/30"
+            >
+              <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-2.5">
+                <Tag className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="font-extrabold text-base sm:text-lg">البيع والإيجار</h2>
+              <p className="text-xs text-emerald-100 mt-1">عقارات، سيارات، ومعدات</p>
+            </a>
+
+            <Link
+              href="/stores"
+              className="bg-white/10 hover:bg-white/15 text-white p-4 sm:p-5 rounded-2xl shadow-lg transition flex flex-col items-center text-center border border-white/15"
+            >
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center mb-2.5">
+                <Store className="w-6 h-6" />
+              </div>
+              <h2 className="font-extrabold text-base sm:text-lg">المتاجر والمحلات</h2>
+              <p className="text-xs text-slate-300 mt-1">تصفح محلات شبين وقراها</p>
+            </Link>
+
+            <Link
+              href="/clinics"
+              className="bg-white/10 hover:bg-white/15 text-white p-4 sm:p-5 rounded-2xl shadow-lg transition flex flex-col items-center text-center border border-white/15"
+            >
+              <div className="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center mb-2.5">
+                <Stethoscope className="w-6 h-6" />
+              </div>
+              <h2 className="font-extrabold text-base sm:text-lg">احجز عيادتك</h2>
+              <p className="text-xs text-slate-300 mt-1">احجز برقم دور بدون زحمة</p>
+            </Link>
+
+            <Link
+              href="/craftsmen"
+              className="bg-white/10 hover:bg-white/15 text-white p-4 sm:p-5 rounded-2xl shadow-lg transition flex flex-col items-center text-center border border-white/15"
+            >
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center mb-2.5">
+                <Hammer className="w-6 h-6" />
+              </div>
+              <h2 className="font-extrabold text-base sm:text-lg">دليل الصنايعية</h2>
+              <p className="text-xs text-slate-300 mt-1">سباك، كهربائي، نجار في قريتك</p>
+            </Link>
+          </div>
           <div className="bg-white rounded-2xl p-3 shadow-2xl text-slate-900 max-w-4xl mx-auto">
             <div className="flex gap-2 mb-3 pb-3 border-b border-slate-100">
               {[
@@ -216,7 +265,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 z-10 w-full">
+      <section id="market-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 z-10 w-full">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { id: "all", name: "جميع الأقسام", icon: SlidersHorizontal },
