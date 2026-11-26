@@ -61,16 +61,15 @@ export default function RootLayout({
                   دليل وخدمات أهالي شبين القناطر وجميع القرى التابعة لها
                 </p>
               </div>
-
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold">
                 <Link href="/about" className="hover:text-white transition">
                   من نحن
                 </Link>
-href={"https://wa.me" + "201063686679"}
+                <Link href="/privacy" className="hover:text-white transition">
                   سياسة الخصوصية والشروط
                 </Link>
                 <a
-                  href="https://wa.me"
+                  href={"https://wa.me" + "201063686679"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-400 hover:text-emerald-300 transition"
@@ -78,6 +77,7 @@ href={"https://wa.me" + "201063686679"}
                   تواصل مع الإدارة (واتساب)
                 </a>
               </div>
+
             </div>
 
             <p className="text-center text-xs text-slate-500 mt-6">
