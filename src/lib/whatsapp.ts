@@ -6,6 +6,6 @@ export function getWhatsAppUrl(phone: string, text?: string): string {
     } else if (cleaned.startsWith("002")) {
         formatted = cleaned.slice(2);
     }
-    const base = "https://wa.me"  + formatted;
+    const base = "https://wa.me" + formatted;
     return text ? base + "?text=" + encodeURIComponent(text) : base;
 }

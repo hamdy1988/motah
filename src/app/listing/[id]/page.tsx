@@ -229,7 +229,7 @@ export default function ListingDetailPage() {
 
                             <div className="space-y-3 mb-6">
                                 <a
-                                    href={`https://wa.me{listing.phone}?text=${encodeURIComponent(`مرحباً، أود حجز موعد معاينة بخصوص إعلانك على منصة مُتاح: ${listing.title}`)}`}
+                                    href={"https://wa.me/2" + listing.phone + "?text=" + encodeURIComponent("مرحباً، أود حجز موعد معاينة بخصوص إعلانك على منصة متاح: " + listing.title)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 transition"
@@ -239,7 +239,7 @@ export default function ListingDetailPage() {
                                 </a>
 
                                 <a
-                                    href={`https://wa.me{listing.phone}`}
+                                    href={"https://wa.me/2" + listing.phone}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition"

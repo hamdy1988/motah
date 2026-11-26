@@ -313,7 +313,7 @@ export default function CraftsmenPage() {
 
                                 <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
                                     <a
-                                        href={"https://wa.me" + item.phone}
+                                        href={"https://wa.me/2" + item.phone}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"

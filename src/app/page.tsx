@@ -384,7 +384,8 @@ export default function HomePage() {
 
                     <div className="grid grid-cols-3 gap-2">
                       <a
-                        href={`https://wa.me{item.phone}?text=${encodeURIComponent(`مرحباً، أود حجز موعد بخصوص إعلانك على منصة مُتاح: ${item.title}`)}`}
+                        href={`https://wa.me/2${item.phone}?text=${encodeURIComponent(`مرحباً، أود حجز موعد بخصوص إعلانك على منصة متاح: ${item.title}`)}`}
+
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition"
@@ -393,7 +394,7 @@ export default function HomePage() {
                         <span>حجز</span>
                       </a>
                       <a
-                        href={`https://wa.me{item.phone}`}
+                        href={`https://wa.me/2${item.phone}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-1 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition"
