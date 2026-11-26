@@ -9,9 +9,36 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
+  title: {
+    default: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
+    template: "%s | منصة مُتاح - شبين القناطر",
+  },
   description:
-    "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات، عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
+    "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات: عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
+  keywords: [
+    "شبين القناطر",
+    "دليل شبين القناطر",
+    "عيادات شبين القناطر",
+    "حجز دكتور شبين القناطر",
+    "متاجر شبين القناطر",
+    "صنايعية شبين القناطر",
+    "عقارات شبين القناطر",
+    "منصة متاح",
+    "كفر الدير",
+    "طحانوب",
+    "نوى",
+    "القشيش",
+    "منية شبين",
+  ],
+  openGraph: {
+    title: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
+    description:
+      "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات: عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
+    url: "https://vercel.app",
+    siteName: "منصة مُتاح",
+    locale: "ar_EG",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -35,27 +62,27 @@ export default function RootLayout({
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-5 text-xs font-bold">
-                <Link href="/about" className="hover:text-teal-400 transition">
+              <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold">
+                <Link href="/about" className="hover:text-white transition">
                   من نحن
                 </Link>
-                <Link href="/privacy" className="hover:text-teal-400 transition">
+                <Link href="/privacy" className="hover:text-white transition">
                   سياسة الخصوصية والشروط
                 </Link>
                 <a
                   href="https://wa.me"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white transition"
+                  className="text-emerald-400 hover:text-emerald-300 transition"
                 >
                   تواصل مع الإدارة (واتساب)
                 </a>
               </div>
             </div>
 
-            <div className="pt-4 text-center text-xs text-slate-500">
-              © {new Date().getFullYear()} منصة مُتاح - جميع الحقوق محفوظة لأهالي شبين القناطر.
-            </div>
+            <p className="text-center text-xs text-slate-500 mt-6">
+              © 2026 منصة مُتاح - جميع الحقوق محفوظة لأهالي شبين القناطر.
+            </p>
           </div>
         </footer>
       </body>
