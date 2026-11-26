@@ -28,7 +28,8 @@ export default function AdminDashboardPage() {
     const [items, setItems] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(false);
 
-    const [showAddDoctor, setShowAddDoctor] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
+
     const [docForm, setDocForm] = useState({
         doctor_name: "",
         specialty: "باطنة وجهاز هضمي",
@@ -37,6 +38,21 @@ export default function AdminDashboardPage() {
         phone: "",
         fee: 150,
         working_hours: "يومياً من 5 مساءً إلى 10 مساءً",
+    });
+
+    const [storeForm, setStoreForm] = useState({
+        name: "",
+        category: "ملابس وأحذية",
+        area: "مدينة شبين القناطر",
+        address: "",
+        phone: "",
+    });
+
+    const [craftForm, setCraftForm] = useState({
+        name: "",
+        profession: "سباك",
+        area: "مدينة شبين القناطر",
+        phone: "",
     });
 
     useEffect(() => {
@@ -71,6 +87,7 @@ export default function AdminDashboardPage() {
 
     const loadTabData = async (tab: "listings" | "doctors" | "stores" | "craftsmen") => {
         setActiveTab(tab);
+        setShowAddForm(false);
         setLoadingData(true);
         const { data } = await supabase
             .from(tab)
@@ -107,10 +124,52 @@ export default function AdminDashboardPage() {
 
         if (!error) {
             alert("تمت إضافة العيادة بنجاح!");
-            setShowAddDoctor(false);
+            setShowAddForm(false);
             setDocForm({ ...docForm, doctor_name: "", address: "", phone: "" });
             loadAllStats();
             loadTabData("doctors");
+        } else {
+            alert("خطأ في الإضافة: " + error.message);
+        }
+    };
+
+    const handleAddStore = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const { error } = await supabase.from("stores").insert({
+            ...storeForm,
+            user_id: userData.user.id,
+        });
+
+        if (!error) {
+            alert("تمت إضافة المتجر بنجاح!");
+            setShowAddForm(false);
+            setStoreForm({ ...storeForm, name: "", address: "", phone: "" });
+            loadAllStats();
+            loadTabData("stores");
+        } else {
+            alert("خطأ في الإضافة: " + error.message);
+        }
+    };
+
+    const handleAddCraftsman = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const { error } = await supabase.from("craftsmen").insert({
+            ...craftForm,
+            user_id: userData.user.id,
+        });
+
+        if (!error) {
+            alert("تمت إضافة الصنايعي بنجاح!");
+            setShowAddForm(false);
+            setCraftForm({ ...craftForm, name: "", phone: "" });
+            loadAllStats();
+            loadTabData("craftsmen");
         } else {
             alert("خطأ في الإضافة: " + error.message);
         }
@@ -144,6 +203,15 @@ export default function AdminDashboardPage() {
         const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""}`.toLowerCase();
         return text.includes(searchQuery.toLowerCase());
     });
+
+    const addButtonLabel =
+        activeTab === "doctors"
+            ? "إضافة طبيب جديد"
+            : activeTab === "stores"
+            ? "إضافة متجر جديد"
+            : activeTab === "craftsmen"
+            ? "إضافة صنايعي جديد"
+            : "";
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
@@ -186,6 +254,7 @@ export default function AdminDashboardPage() {
                         </div>
                     ))}
                 </div>
+
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <div className="flex flex-wrap gap-2">
                         {[
@@ -213,18 +282,17 @@ export default function AdminDashboardPage() {
                         })}
                     </div>
 
-                    {activeTab === "doctors" && (
+                    {addButtonLabel && (
                         <button
-                            onClick={() => setShowAddDoctor(!showAddDoctor)}
+                            onClick={() => setShowAddForm(!showAddForm)}
                             className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm"
                         >
                             <PlusCircle className="w-4 h-4" />
-                            <span>إضافة طبيب جديد</span>
+                            <span>{addButtonLabel}</span>
                         </button>
                     )}
                 </div>
-
-                {activeTab === "doctors" && showAddDoctor && (
+                {activeTab === "doctors" && showAddForm && (
                     <form onSubmit={handleAddDoctor} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
                             type="text"
@@ -288,6 +356,93 @@ export default function AdminDashboardPage() {
                     </form>
                 )}
 
+                {activeTab === "stores" && showAddForm && (
+                    <form onSubmit={handleAddStore} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            required
+                            placeholder="اسم المتجر / المحل"
+                            value={storeForm.name}
+                            onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="text"
+                            required
+                            placeholder="النشاط (مثال: ملابس، سوبر ماركت، صيدلية)"
+                            value={storeForm.category}
+                            onChange={(e) => setStoreForm({ ...storeForm, category: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="text"
+                            required
+                            placeholder="المنطقة / القرية"
+                            value={storeForm.area}
+                            onChange={(e) => setStoreForm({ ...storeForm, area: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="text"
+                            required
+                            placeholder="العنوان بالتفصيل"
+                            value={storeForm.address}
+                            onChange={(e) => setStoreForm({ ...storeForm, address: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="tel"
+                            required
+                            placeholder="رقم هاتف / واتساب المتجر"
+                            value={storeForm.phone}
+                            onChange={(e) => setStoreForm({ ...storeForm, phone: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <button type="submit" className="py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700">
+                            حفظ ونشر المتجر
+                        </button>
+                    </form>
+                )}
+
+                {activeTab === "craftsmen" && showAddForm && (
+                    <form onSubmit={handleAddCraftsman} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input
+                            type="text"
+                            required
+                            placeholder="اسم الصنايعي / الفني"
+                            value={craftForm.name}
+                            onChange={(e) => setCraftForm({ ...craftForm, name: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="text"
+                            required
+                            placeholder="المهنة (مثال: سباك، كهربائي، نقاش)"
+                            value={craftForm.profession}
+                            onChange={(e) => setCraftForm({ ...craftForm, profession: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="text"
+                            required
+                            placeholder="المنطقة / القرية"
+                            value={craftForm.area}
+                            onChange={(e) => setCraftForm({ ...craftForm, area: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="tel"
+                            required
+                            placeholder="رقم الهاتف / واتساب"
+                            value={craftForm.phone}
+                            onChange={(e) => setCraftForm({ ...craftForm, phone: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <button type="submit" className="py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 sm:col-span-2">
+                            حفظ ونشر الصنايعي
+                        </button>
+                    </form>
+                )}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-slate-100 flex items-center gap-2">
                         <Search className="w-4 h-4 text-slate-400" />
@@ -315,7 +470,7 @@ export default function AdminDashboardPage() {
                                             {item.title || item.doctor_name || item.name}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            {item.area || item.category || item.specialty || ""} • {item.phone || ""}
+                                            {item.area || item.category || item.specialty || item.profession || ""} • {item.phone || ""}
                                         </p>
                                     </div>
                                     <button
