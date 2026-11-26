@@ -69,7 +69,7 @@ export default function RootLayout({
                   سياسة الخصوصية والشروط
                 </Link>
                 <a
-                  href={"https://wa.me" + "201063686679"}
+                  href={"https://wa.me/" + "201063686679"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-400 hover:text-emerald-300 transition"
