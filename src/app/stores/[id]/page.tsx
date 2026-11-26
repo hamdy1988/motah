@@ -172,7 +172,7 @@ export default function SingleStorePage() {
 
                         <div className="flex gap-2">
                             <a
-                                href={`https://wa.me{store.phone}`}
+                                href={`https://wa.me\${store.phone}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition"
@@ -270,7 +270,7 @@ export default function SingleStorePage() {
                                     </p>
                                     <div className="flex gap-2">
                                         <a
-                                            href={`https://wa.me{store.phone}?text=${encodeURIComponent(`مرحباً، أود طلب: ${prod.title} من متجر ${store.name}`)}`}
+                                            href={`https://wa.me/2${store.phone}?text=${encodeURIComponent(`مرحباً، أود طلب: ${prod.title} من متجر ${store.name}`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex-1 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold text-center"
