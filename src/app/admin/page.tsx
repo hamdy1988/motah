@@ -17,7 +17,7 @@ import {
     Search,
 } from "lucide-react";
 
-const ADMIN_EMAIL = "hamdy_etman1988@yahoo.com";
+const ADMIN_PHONE = "01063686679";
 
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
@@ -41,8 +41,9 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
-            const email = data.user?.email;
-            if (email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+            const email = data.user?.email || "";
+            const phone = data.user?.phone || "";
+            if (email.startsWith(ADMIN_PHONE) || phone.includes(ADMIN_PHONE)) {
                 setAuthorized(true);
                 loadAllStats();
                 loadTabData("listings");
@@ -333,4 +334,3 @@ export default function AdminDashboardPage() {
         </div>
     );
 }
-
