@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
     description:
       "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات: عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
-url: "https://" + "motah-mrr2.vercel.app",
+    url: "https://" + "motah-mrr2.vercel.app",
     siteName: "منصة مُتاح",
     locale: "ar_EG",
     type: "website",
@@ -61,6 +61,7 @@ export default function RootLayout({
                   دليل وخدمات أهالي شبين القناطر وجميع القرى التابعة لها
                 </p>
               </div>
+
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold">
                 <Link href="/about" className="hover:text-white transition">
                   من نحن
@@ -77,7 +78,6 @@ export default function RootLayout({
                   تواصل مع الإدارة (واتساب)
                 </a>
               </div>
-
             </div>
 
             <p className="text-center text-xs text-slate-500 mt-6">
