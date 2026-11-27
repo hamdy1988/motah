@@ -54,6 +54,18 @@ const PROFESSIONS = [
     "ميكانيكي سيارات",
     "فني أجهزة منزلية",
 ];
+
+const STORE_CATEGORIES = [
+    "سوبر ماركت وبقالة",
+    "ملابس وأحذية",
+    "موبايلات وإلكترونيات",
+    "أدوات منزلية ومفروشات",
+    "مطاعم وكافيهات",
+    "صيدليات ومستحضرات تجميل",
+    "قطع غيار سيارات",
+    "مكتبات وأدوات مدرسية",
+    "محلات أخرى",
+];
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [activeTab, setActiveTab] = useState<"listings" | "doctors" | "stores" | "craftsmen">("listings");
@@ -61,6 +73,7 @@ export default function AdminDashboardPage() {
     const [filterArea, setFilterArea] = useState("كل شبين القناطر وقراها");
     const [filterSpecialty, setFilterSpecialty] = useState("كل التخصصات");
     const [filterProfession, setFilterProfession] = useState("كل المهن");
+    const [filterCategory, setFilterCategory] = useState("كل التصنيفات");
 
     const [stats, setStats] = useState({ listings: 0, doctors: 0, stores: 0, craftsmen: 0, appointments: 0 });
     const [items, setItems] = useState<any[]>([]);
@@ -79,7 +92,7 @@ export default function AdminDashboardPage() {
 
     const [storeForm, setStoreForm] = useState({
         name: "",
-        category: "ملابس وأحذية",
+        category: "سوبر ماركت وبقالة",
         area: "مدينة شبين القناطر",
         address: "",
         phone: "",
@@ -128,6 +141,7 @@ export default function AdminDashboardPage() {
         setFilterArea("كل شبين القناطر وقراها");
         setFilterSpecialty("كل التخصصات");
         setFilterProfession("كل المهن");
+        setFilterCategory("كل التصنيفات");
         setLoadingData(true);
         const { data } = await supabase
             .from(tab)
@@ -150,7 +164,6 @@ export default function AdminDashboardPage() {
             alert("حدث خطأ أثناء الحذف: " + error.message);
         }
     };
-
     const handleAddDoctor = async (e: React.FormEvent) => {
         e.preventDefault();
         const { data: userData } = await supabase.auth.getUser();
@@ -240,7 +253,7 @@ export default function AdminDashboardPage() {
     }
 
     const filteredItems = items.filter((item) => {
-        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""} ${item.specialty || ""} ${item.profession || ""}`.toLowerCase();
+        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""} ${item.specialty || ""} ${item.profession || ""} ${item.category || ""}`.toLowerCase();
         const matchSearch = text.includes(searchQuery.toLowerCase());
         const matchArea = filterArea === "كل شبين القناطر وقراها" || item.area === filterArea;
         const matchSpec =
@@ -251,7 +264,11 @@ export default function AdminDashboardPage() {
             activeTab !== "craftsmen" ||
             filterProfession === "كل المهن" ||
             item.profession === filterProfession;
-        return matchSearch && matchArea && matchSpec && matchProf;
+        const matchCat =
+            activeTab !== "stores" ||
+            filterCategory === "كل التصنيفات" ||
+            item.category === filterCategory;
+        return matchSearch && matchArea && matchSpec && matchProf && matchCat;
     });
 
     const addButtonLabel =
@@ -419,14 +436,15 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <input
-                            type="text"
-                            required
-                            placeholder="التصنيف (ملابس، سوبر ماركت، صيدلية...)"
+                        <select
                             value={storeForm.category}
                             onChange={(e) => setStoreForm({ ...storeForm, category: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {STORE_CATEGORIES.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
                         <select
                             value={storeForm.area}
                             onChange={(e) => setStoreForm({ ...storeForm, area: e.target.value })}
@@ -532,6 +550,19 @@ export default function AdminDashboardPage() {
                                 <option value="كل التخصصات">كل التخصصات</option>
                                 {SPECIALTIES.map((s) => (
                                     <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        )}
+
+                        {activeTab === "stores" && (
+                            <select
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50"
+                            >
+                                <option value="كل التصنيفات">كل التصنيفات</option>
+                                {STORE_CATEGORIES.map((c) => (
+                                    <option key={c} value={c}>{c}</option>
                                 ))}
                             </select>
                         )}
