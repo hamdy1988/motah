@@ -34,14 +34,30 @@ export const metadata: Metadata = {
     "منية شبين",
   ],
   openGraph: {
-    title: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
+    title: "مُتاح | Motah - دليلك الشامل في شبين القناطر وقراها",
     description:
       "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات: عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
-    url: "https://" + "motah-mrr2.vercel.app",
+    url: "https://motaheg.com",
     siteName: "منصة مُتاح",
+    images: [
+      {
+        url: "https://motaheg.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "منصة مُتاح - دليلك الشامل في شبين القناطر وقراها",
+      },
+    ],
     locale: "ar_EG",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "مُتاح | Motah - دليلك الشامل في شبين القناطر وقراها",
+    description:
+      "منصة أهالي شبين القناطر وقراها للخدمات والإعلانات: عيادات، متاجر، صنايعية، عقارات، وسيارات في مكان واحد.",
+    images: ["https://motaheg.com/og-image.png"],
+  },
+
   verification: {
     google: "XOtd2kqjQhfyEmfzg7qKYtKbIW679zMnFLxHwJl2hs4",
   },
