@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import Logo from "@/components/Logo";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -57,12 +58,13 @@ export default function RootLayout({
         <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 mt-12">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
-              <div className="text-center sm:text-right">
-                <p className="text-lg font-extrabold text-white">مُتاح | Motah</p>
-                <p className="text-xs text-slate-400 mt-1">
+              <div className="flex flex-col items-center sm:items-start">
+                <Logo lightText />
+                <p className="text-xs text-slate-400 mt-2">
                   دليل وخدمات أهالي شبين القناطر وجميع القرى التابعة لها
                 </p>
               </div>
+
 
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold">
                 <Link href="/about" className="hover:text-white transition">
