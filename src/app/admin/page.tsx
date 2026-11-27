@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-
 import { supabase } from "@/lib/supabase";
 import {
-    ShieldCheck,
     Tag,
     Stethoscope,
     Store,
@@ -70,6 +68,7 @@ export default function AdminDashboardPage() {
             }
         });
     }, []);
+
     const loadAllStats = async () => {
         const [l, d, s, c, a] = await Promise.all([
             supabase.from("listings").select("id", { count: "exact", head: true }),
@@ -210,33 +209,30 @@ export default function AdminDashboardPage() {
         activeTab === "doctors"
             ? "إضافة طبيب جديد"
             : activeTab === "stores"
-            ? "إضافة متجر جديد"
-            : activeTab === "craftsmen"
-            ? "إضافة صنايعي جديد"
-            : "";
+                ? "إضافة متجر جديد"
+                : activeTab === "craftsmen"
+                    ? "إضافة صنايعي جديد"
+                    : "";
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
             <div className="bg-slate-900 text-white py-6 px-4 shadow-md">
                 <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-400">
-                            <ShieldCheck className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-extrabold flex items-center gap-2">
-                                <span>غرفة تحكم منصة مُتاح<div className="flex items-center gap-4">
-                                    <Logo lightText />
-                                    <span className="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-extrabold border border-emerald-500/30">
-                                        غرفة التحكم Admin
-                                    </span>
-                                </div>
-</span>
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300">Admin</span>
+                    <div className="flex items-center gap-4">
+                        <Logo lightText />
+                        <div className="hidden sm:block border-r border-slate-700 pr-4">
+                            <h1 className="text-base font-extrabold flex items-center gap-2 text-white">
+                                <span>غرفة تحكم منصة مُتاح</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
+                                    Admin
+                                </span>
                             </h1>
-                            <p className="text-xs text-slate-400">إدارة المحتوى، العيادات، والمتاجر في شبين القناطر</p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                إدارة المحتوى، العيادات، والمتاجر في شبين القناطر
+                            </p>
                         </div>
                     </div>
+
                     <Link
                         href="/"
                         className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1.5 transition"
@@ -277,11 +273,10 @@ export default function AdminDashboardPage() {
                                 <button
                                     key={tab.key}
                                     onClick={() => loadTabData(tab.key as any)}
-                                    className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition ${
-                                        isActive
+                                    className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition ${isActive
                                             ? "bg-slate-900 text-white shadow-sm"
                                             : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-                                    }`}
+                                        }`}
                                 >
                                     <Icon className="w-4 h-4" />
                                     <span>{tab.label}</span>
@@ -345,7 +340,7 @@ export default function AdminDashboardPage() {
                         <input
                             type="number"
                             required
-                            placeholder="سعر الكشف"
+                            placeholder="سعر الكشف بالجنيه"
                             value={docForm.fee}
                             onChange={(e) => setDocForm({ ...docForm, fee: Number(e.target.value) })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
@@ -358,18 +353,18 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setDocForm({ ...docForm, working_hours: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm sm:col-span-2"
                         />
-                        <button type="submit" className="py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700">
-                            حفظ ونشر العيادة
+                        <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-2.5 text-sm">
+                            حفظ العيادة
                         </button>
                     </form>
                 )}
 
                 {activeTab === "stores" && showAddForm && (
-                    <form onSubmit={handleAddStore} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <form onSubmit={handleAddStore} className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
                             type="text"
                             required
-                            placeholder="اسم المتجر / المحل"
+                            placeholder="اسم المتجر أو المحل"
                             value={storeForm.name}
                             onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
@@ -377,7 +372,7 @@ export default function AdminDashboardPage() {
                         <input
                             type="text"
                             required
-                            placeholder="النشاط (مثال: ملابس، سوبر ماركت، صيدلية)"
+                            placeholder="التصنيف (ملابس، سوبر ماركت، صيدلية...)"
                             value={storeForm.category}
                             onChange={(e) => setStoreForm({ ...storeForm, category: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
@@ -401,23 +396,23 @@ export default function AdminDashboardPage() {
                         <input
                             type="tel"
                             required
-                            placeholder="رقم هاتف / واتساب المتجر"
+                            placeholder="رقم هاتف المتجر"
                             value={storeForm.phone}
                             onChange={(e) => setStoreForm({ ...storeForm, phone: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <button type="submit" className="py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700">
-                            حفظ ونشر المتجر
+                        <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl py-2.5 text-sm">
+                            حفظ المتجر
                         </button>
                     </form>
                 )}
 
                 {activeTab === "craftsmen" && showAddForm && (
-                    <form onSubmit={handleAddCraftsman} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <form onSubmit={handleAddCraftsman} className="bg-white p-6 rounded-2xl border border-indigo-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input
                             type="text"
                             required
-                            placeholder="اسم الصنايعي / الفني"
+                            placeholder="اسم الصنايعي"
                             value={craftForm.name}
                             onChange={(e) => setCraftForm({ ...craftForm, name: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
@@ -425,7 +420,7 @@ export default function AdminDashboardPage() {
                         <input
                             type="text"
                             required
-                            placeholder="المهنة (مثال: سباك، كهربائي، نقاش)"
+                            placeholder="المهنة (سباك، كهربائي، نجار، نقاش...)"
                             value={craftForm.profession}
                             onChange={(e) => setCraftForm({ ...craftForm, profession: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
@@ -441,16 +436,17 @@ export default function AdminDashboardPage() {
                         <input
                             type="tel"
                             required
-                            placeholder="رقم الهاتف / واتساب"
+                            placeholder="رقم الهاتف"
                             value={craftForm.phone}
                             onChange={(e) => setCraftForm({ ...craftForm, phone: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <button type="submit" className="py-2.5 rounded-xl bg-teal-600 text-white font-bold text-sm hover:bg-teal-700 sm:col-span-2">
-                            حفظ ونشر الصنايعي
+                        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 text-sm sm:col-span-2">
+                            حفظ الصنايعي
                         </button>
                     </form>
                 )}
+
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-slate-100 flex items-center gap-2">
                         <Search className="w-4 h-4 text-slate-400" />
@@ -464,29 +460,31 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {loadingData ? (
-                        <div className="py-12 flex justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                        <div className="p-12 text-center text-slate-400">
+                            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                         </div>
                     ) : filteredItems.length === 0 ? (
-                        <p className="text-center text-sm text-slate-400 py-12">لا توجد بيانات في هذا القسم حالياً.</p>
+                        <div className="p-12 text-center text-sm text-slate-400">
+                            لا توجد بيانات في هذا القسم حالياً.
+                        </div>
                     ) : (
                         <div className="divide-y divide-slate-100">
                             {filteredItems.map((item) => (
                                 <div key={item.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50">
                                     <div>
-                                        <p className="text-sm font-extrabold text-slate-900">
+                                        <p className="font-bold text-slate-900 text-sm">
                                             {item.title || item.doctor_name || item.name}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            {item.area || item.category || item.specialty || item.profession || ""} • {item.phone || ""}
+                                            {item.area} {item.specialty ? `• ${item.specialty}` : ""} {item.category ? `• ${item.category}` : ""} {item.profession ? `• ${item.profession}` : ""} {item.phone ? `• ${item.phone}` : ""}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => handleDelete(item.id)}
-                                        className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold flex items-center gap-1 transition"
+                                        className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition"
+                                        title="حذف نهائي"
                                     >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                        <span>حذف</span>
+                                        <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
                             ))}
