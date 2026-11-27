@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     ArrowRight,
-    Upload,
     Loader2,
     CheckCircle,
     Tag,
@@ -16,6 +15,7 @@ import {
     Phone,
     Image as ImageIcon,
 } from "lucide-react";
+
 export default function AddListingPage() {
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
@@ -43,10 +43,10 @@ export default function AddListingPage() {
         });
     }, [router]);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setImageFile(files[0]);
+            setImagePreview(URL.createObjectURL(files[0]));
         }
     };
 
@@ -62,12 +62,12 @@ export default function AddListingPage() {
             const fileExt = imageFile.name.split(".").pop();
             const fileName = `${userId}-${Date.now()}.${fileExt}`;
             const { error: uploadError } = await supabase.storage
-                .from("listings")
+                .from("listings-images")
                 .upload(fileName, imageFile);
 
             if (!uploadError) {
                 const { data: publicUrlData } = supabase.storage
-                    .from("listings")
+                    .from("listings-images")
                     .getPublicUrl(fileName);
                 uploadedImageUrl = publicUrlData.publicUrl;
             }
@@ -173,7 +173,7 @@ export default function AddListingPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                                    القسم (20 قسماً)
+                                    القسم
                                 </label>
                                 <select
                                     value={category}
@@ -304,6 +304,7 @@ export default function AddListingPage() {
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             />
                         </div>
+
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1.5">
                                 صورة الإعلان
@@ -334,6 +335,7 @@ export default function AddListingPage() {
                                 />
                             </label>
                         </div>
+
                         <button
                             type="submit"
                             disabled={loading}
