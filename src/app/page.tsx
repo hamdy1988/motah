@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
+import Logo from "@/components/Logo";
 import {
   Search,
   MapPin,
@@ -57,6 +58,7 @@ export default function HomePage() {
       const { data } = await supabase
         .from("listings")
         .select("*")
+        .order("is_verified", { ascending: false })
         .order("created_at", { ascending: false });
 
       if (data) setListings(data);
@@ -81,30 +83,13 @@ export default function HomePage() {
       .includes(searchQuery.toLowerCase());
     return matchType && matchCat && matchArea && matchSearch;
   });
-
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* الهيدر العلوي بالشعار الجديد */}
+      {/* الهيدر العلوي باللوجو الجديد */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-black text-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <span>م</span>
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white"></span>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-black tracking-tight text-slate-900">
-                  مُتاح
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                  Motah
-                </span>
-              </div>
-              <span className="text-xs font-medium text-slate-500 block -mt-1">
-                دليل شبين القناطر وقراها
-              </span>
-            </div>
+          <Link href="/">
+            <Logo />
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -154,6 +139,7 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
       {/* القسم الترحيبي (Hero) */}
       <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
@@ -207,7 +193,7 @@ export default function HomePage() {
               href="/craftsmen"
               className="bg-white/10 hover:bg-white/15 text-white p-4 sm:p-5 rounded-2xl shadow-lg transition flex flex-col items-center text-center border border-white/15"
             >
-              <div className="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center mb-2.5">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center mb-2.5">
                 <Hammer className="w-6 h-6" />
               </div>
               <h2 className="font-extrabold text-base sm:text-lg">الصنايعية والحرف</h2>
@@ -216,31 +202,73 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <main id="market-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+        {/* شريط البحث والفلترة */}
+        <div className="bg-white rounded-2xl p-4 shadow-md border border-slate-200/80">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div className="flex gap-2">
+              {[
+                { id: "all", label: "الكل" },
+                { id: "rent", label: "للإيجار" },
+                { id: "sale", label: "للبيع" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedType(tab.id as "all" | "sale" | "rent")}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition ${selectedType === tab.id
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-      {/* قسم الإعلانات والسوق المفتوح */}
-      <main id="market-section" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* شريط البحث والفلاتر المدمج */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-4 sm:p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* حقل البحث */}
-            <div className="relative flex-1">
-              <Search className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500">
+                <Filter className="w-3.5 h-3.5 text-emerald-600" />
+                التصنيف:
+              </span>
+              {[
+                { id: "all", label: "جميع الأقسام" },
+                { id: "real_estate", label: "عقارات وأراضي" },
+                { id: "vehicles", label: "سيارات ومركبات" },
+                { id: "equipment", label: "معدات وأدوات" },
+                { id: "other", label: "أخرى" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${selectedCategory === cat.id
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div className="md:col-span-7 relative flex items-center">
+              <Search className="w-5 h-5 text-slate-400 absolute right-3" />
               <input
                 type="text"
                 placeholder="ابحث عن شقة، سيارة، محل، أو أي غرض..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pr-11 pl-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+                className="w-full pr-10 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
-            {/* اختيار المنطقة */}
-            <div className="relative sm:w-64">
-              <MapPin className="w-4 h-4 text-emerald-600 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="md:col-span-5 relative flex items-center">
+              <MapPin className="w-5 h-5 text-emerald-600 absolute right-3" />
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl pr-10 pl-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition cursor-pointer"
+                className="w-full pr-10 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 {SHIBIN_AREAS.map((area) => (
                   <option key={area} value={area}>
@@ -249,245 +277,135 @@ export default function HomePage() {
                 ))}
               </select>
             </div>
+          </div>
+        </div>
 
-            {/* أزرار نوع العرض (الكل / بيع / إيجار) */}
-            <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl">
-              {[
-                { id: "all", label: "الكل" },
-                { id: "sale", label: "للبيع" },
-                { id: "rent", label: "للإيجار" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedType(tab.id as "all" | "sale" | "rent")}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${selectedType === tab.id
-                      ? "bg-white text-emerald-700 shadow-xs"
-                      : "text-slate-600 hover:text-slate-900"
+        {/* بانر تمييز الإعلانات والعيادات */}
+        <div className="rounded-2xl bg-gradient-to-l from-emerald-600 via-teal-700 to-slate-900 p-5 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 text-center sm:text-right">
+            <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-white/15 items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-amber-300" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-extrabold">
+                صاحب عيادة أو محل أو مكتب عقارات في شبين القناطر؟
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-100 mt-0.5">
+                ثبّت إعلانك أو متجرك في صدارة الموقع ليراه آلاف الأهالي يومياً!
+              </p>
+            </div>
+          </div>
+          <a
+            href={"https://wa.me" + "201063686679?text=" + encodeURIComponent("مرحباً إدارة منصة مُتاح، أرغب في تمييز إعلاني أو إضافة متجري/عيادتي.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-sm"
+          >
+            ميّز إعلانك الآن
+          </a>
+        </div>
+        {/* قائمة الإعلانات */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-emerald-600" />
+              <span>أحدث الإعلانات المتاحة</span>
+            </h2>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
+              {loading ? "جاري التحميل..." : `${filteredListings.length} إعلان`}
+            </span>
+          </div>
+
+          {!loading && filteredListings.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+              <p className="text-lg font-bold text-slate-800 mb-2">لا توجد إعلانات مطابقة لبحثك حالياً</p>
+              <p className="text-sm text-slate-500 mb-6">كن أول من يضيف إعلاناً في هذا القسم أو هذه القرية!</p>
+              <Link
+                href="/add-listing"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-3 rounded-xl transition"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>أضف أول إعلان الآن</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredListings.map((item) => (
+                <div
+                  key={item.id}
+                  className={`bg-white rounded-2xl border overflow-hidden hover:shadow-xl transition duration-300 flex flex-col group ${item.is_verified ? "border-amber-300 ring-1 ring-amber-200/60" : "border-slate-200"
                     }`}
                 >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* أزرار التصنيفات السريعة */}
-          <div className="flex items-center gap-2 overflow-x-auto pt-4 mt-4 border-t border-slate-100 no-scrollbar">
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-400 ml-2 shrink-0">
-              <Filter className="w-3.5 h-3.5" />
-              التصنيف:
-            </span>
-            {[
-              { id: "all", label: "جميع الأقسام" },
-              { id: "real_estate", label: "عقارات وأراضي" },
-              { id: "vehicles", label: "سيارات ومركبات" },
-              { id: "equipment", label: "معدات وأدوات" },
-              { id: "other", label: "أخرى" },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition border ${selectedCategory === cat.id
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
-                  }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* عنوان النتائج وعددها */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              أحدث الإعلانات المتاحة
-            </h2>
-          </div>
-          <span className="text-xs sm:text-sm font-semibold text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">
-            {filteredListings.length} إعلان
-          </span>
-        </div>
-
-        {/* شبكة عرض الإعلانات */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden animate-pulse"
-              >
-                <div className="h-52 bg-slate-200" />
-                <div className="p-5 space-y-3">
-                  <div className="h-5 bg-slate-200 rounded-lg w-3/4" />
-                  <div className="h-4 bg-slate-100 rounded-lg w-1/2" />
-                  <div className="h-10 bg-slate-100 rounded-xl w-full mt-4" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredListings.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center max-w-lg mx-auto my-8">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-extrabold text-slate-900 mb-1">
-              لا توجد إعلانات مطابقة لبحثك
-            </h3>
-            <p className="text-sm text-slate-500 mb-6">
-              جرب تغيير كلمات البحث أو اختيار منطقة وتصنيف مختلف.
-            </p>
-            <button
-              onClick={() => {
-                setSelectedType("all");
-                setSelectedCategory("all");
-                setSelectedArea("كل شبين القناطر وقراها");
-                setSearchQuery("");
-              }}
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
-            >
-              إعادة ضبط الفلاتر
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredListings.map((item) => {
-              const cleanPhone = item.phone?.replace(/\D/g, "") || "";
-              const whatsappNumber = cleanPhone.startsWith("0")
-                ? `2${cleanPhone}`
-                : cleanPhone;
-
-              return (
-                <article
-                  key={item.id}
-                  className="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col"
-                >
-                  {/* صورة الإعلان والشارات */}
-                  <div className="relative h-56 bg-slate-100 overflow-hidden">
+                  <Link
+                    href={`/listing/${item.id}`}
+                    className="relative aspect-[4/3] overflow-hidden bg-slate-100 block"
+                  >
                     <img
-                      src={
-                        item.image_url ||
-                        "https://unsplash.com"
-                      }
+                      src={item.image_url || "https://placehold.co"}
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
-
-                    {/* شارة نوع العرض */}
                     <span
-                      className={`absolute top-3.5 right-3.5 px-3 py-1 rounded-xl text-xs font-extrabold shadow-sm ${item.listing_type === "sale"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-amber-500 text-slate-950"
+                      className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${item.listing_type === "rent" ? "bg-emerald-600" : "bg-sky-600"
                         }`}
                     >
-                      {item.listing_type === "sale" ? "للبيع" : "للإيجار"}
+                      {item.listing_type === "rent" ? "للإيجار" : "للبيع"}
                     </span>
 
-                    {/* شارة التوثيق */}
                     {item.is_verified && (
-                      <span className="absolute top-3.5 left-3.5 inline-flex items-center gap-1 bg-white/95 backdrop-blur-xs text-emerald-700 px-2.5 py-1 rounded-xl text-xs font-bold shadow-sm">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        موثق
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-400 text-slate-950 shadow-sm inline-flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>مميز</span>
                       </span>
                     )}
+                  </Link>
 
-                    {/* السعر أسفل الصورة */}
-                    <div className="absolute bottom-3.5 right-3.5 left-3.5 flex items-end justify-between text-white">
-                      <div>
-                        <span className="text-xl font-black tracking-tight">
-                          {Number(item.price).toLocaleString("ar-EG")} ج.م
-                        </span>
-                        {item.listing_type === "rent" && item.rent_period && (
-                          <span className="text-xs text-slate-200 mr-1">
-                            / {item.rent_period}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* تفاصيل الإعلان */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 mb-2">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span>{item.area}</span>
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1 text-xs font-semibold text-slate-500 mb-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="truncate">{item.area}</span>
                     </div>
 
-                    <Link href={`/listings/${item.id}`}>
-                      <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-emerald-700 transition line-clamp-1 mb-3">
+                    <Link href={`/listing/${item.id}`}>
+                      <h3 className="font-extrabold text-slate-900 text-base line-clamp-2 group-hover:text-emerald-700 transition mb-2">
                         {item.title}
                       </h3>
                     </Link>
 
-                    {/* المواصفات المختصرة */}
-                    {item.specs && item.specs.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {item.specs.slice(0, 3).map((spec, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[11px] font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg"
-                          >
-                            {spec}
-                          </span>
-                        ))}
+                    <div className="mt-auto pt-3 border-t border-slate-100">
+                      <p className="text-lg font-extrabold text-emerald-700 mb-3">
+                        {Number(item.price).toLocaleString("ar-EG")}{" "}
+                        <span className="text-xs font-bold text-slate-500">
+                          ج.م {item.listing_type === "rent" && item.rent_period ? `/ ${item.rent_period}` : ""}
+                        </span>
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href={`tel:${item.phone}`}
+                          className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-slate-700" />
+                          <span>اتصال</span>
+                        </a>
+                        <a
+                          href={"https://wa.me" + item.phone.replace(/\D/g, "") + "?text=" + encodeURIComponent(`مرحباً، بخصوص إعلانك "${item.title}" على منصة مُتاح`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>واتساب</span>
+                        </a>
                       </div>
-                    )}
-
-                    {/* أزرار التواصل المباشر */}
-                    <div className="mt-auto pt-4 border-t border-slate-100 grid grid-cols-2 gap-2.5">
-                      <a
-                        href={`tel:${item.phone}`}
-                        className="inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition"
-                      >
-                        <Phone className="w-3.5 h-3.5" />
-                        <span>اتصال</span>
-                      </a>
-
-                      <a
-                        href={`https://wa.me{whatsappNumber}?text=${encodeURIComponent(
-                          `مرحباً، بخصوص إعلانك على منصة مُتاح: ${item.title}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold py-2.5 px-3 rounded-xl transition"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>واتساب</span>
-                      </a>
                     </div>
                   </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </main>
-
-      {/* الفوتر */}
-      <footer className="bg-slate-900 text-slate-400 py-8 px-4 mt-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-black flex items-center justify-center text-sm">
-              م
-            </span>
-            <span className="font-bold text-white">منصة مُتاح</span>
-            <span>• جميع الحقوق محفوظة لأهالي شبين القناطر</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/stores" className="hover:text-white transition">
-              المتاجر
-            </Link>
-            <Link href="/clinics" className="hover:text-white transition">
-              العيادات
-            </Link>
-            <Link href="/craftsmen" className="hover:text-white transition">
-              الصنايعية
-            </Link>
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </footer>
+      </main>
     </div>
   );
 }
