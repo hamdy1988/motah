@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import Logo from "@/components/Logo";
+import Navbar from "@/components/Navbar";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -10,6 +11,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://" + "motah-mrr2.vercel.app"),
   title: {
     default: "مُتاح | Motah - للبيع والإيجار والخدمات في شبين القناطر وقراها",
     template: "%s | منصة مُتاح - شبين القناطر",
@@ -44,6 +46,7 @@ export const metadata: Metadata = {
     google: "XOtd2kqjQhfyEmfzg7qKYtKbIW679zMnFLxHwJl2hs4",
   },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,6 +55,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`${cairo.className} bg-slate-50 text-slate-900 antialiased flex flex-col min-h-screen`}>
+        <Navbar />
         <main className="flex-1">{children}</main>
 
         {/* شريط التذييل السفلي (Footer) */}
@@ -65,7 +69,6 @@ export default function RootLayout({
                 </p>
               </div>
 
-
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold">
                 <Link href="/about" className="hover:text-white transition">
                   من نحن
@@ -74,7 +77,7 @@ export default function RootLayout({
                   سياسة الخصوصية والشروط
                 </Link>
                 <a
-                  href={"https://wa.me/" + "201063686679"}
+                  href={"https://wa.me" + "201063686679"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-400 hover:text-emerald-300 transition"
