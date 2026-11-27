@@ -5,6 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
+import { LISTING_CATEGORIES } from "@/lib/categories";
 import {
     Tag,
     Stethoscope,
@@ -66,15 +67,6 @@ const STORE_CATEGORIES = [
     "مكتبات وأدوات مدرسية",
     "محلات أخرى",
 ];
-
-const LISTING_CATEGORIES = [
-    "عقارات",
-    "سيارات وموتوسيكلات",
-    "موبايلات وإلكترونيات",
-    "أثاث وأجهزة منزلية",
-    "معدات وآلات",
-    "أخرى",
-];
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [activeTab, setActiveTab] = useState<"listings" | "doctors" | "stores" | "craftsmen">("listings");
@@ -93,7 +85,7 @@ export default function AdminDashboardPage() {
         title: "",
         description: "",
         listing_type: "sale" as "sale" | "rent",
-        category: "عقارات",
+        category: "عقارات وأراضي",
         price: 0,
         rent_period: "شهرياً",
         area: "مدينة شبين القناطر",
@@ -317,7 +309,7 @@ export default function AdminDashboardPage() {
             filterProfession === "كل المهن" ||
             item.profession === filterProfession;
         const matchCat =
-            activeTab !== "stores" ||
+            (activeTab !== "stores" && activeTab !== "listings") ||
             filterCategory === "كل التصنيفات" ||
             item.category === filterCategory;
         return matchSearch && matchArea && matchSpec && matchProf && matchCat;
@@ -666,6 +658,19 @@ export default function AdminDashboardPage() {
                                 <option key={v} value={v}>{v}</option>
                             ))}
                         </select>
+
+                        {activeTab === "listings" && (
+                            <select
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50"
+                            >
+                                <option value="كل التصنيفات">كل الأقسام (20 قسماً)</option>
+                                {LISTING_CATEGORIES.map((c) => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        )}
 
                         {activeTab === "doctors" && (
                             <select
