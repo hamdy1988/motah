@@ -41,12 +41,26 @@ const SPECIALTIES = [
     "صيدليات",
     "تخصص آخر",
 ];
+
+const PROFESSIONS = [
+    "سباك",
+    "كهربائي",
+    "نجار",
+    "نقاش",
+    "محارة وبناء",
+    "فني تكييف وتبريد",
+    "حداد وألوميتال",
+    "فني دش وستالايت",
+    "ميكانيكي سيارات",
+    "فني أجهزة منزلية",
+];
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [activeTab, setActiveTab] = useState<"listings" | "doctors" | "stores" | "craftsmen">("listings");
     const [searchQuery, setSearchQuery] = useState("");
     const [filterArea, setFilterArea] = useState("كل شبين القناطر وقراها");
     const [filterSpecialty, setFilterSpecialty] = useState("كل التخصصات");
+    const [filterProfession, setFilterProfession] = useState("كل المهن");
 
     const [stats, setStats] = useState({ listings: 0, doctors: 0, stores: 0, craftsmen: 0, appointments: 0 });
     const [items, setItems] = useState<any[]>([]);
@@ -77,7 +91,6 @@ export default function AdminDashboardPage() {
         area: "مدينة شبين القناطر",
         phone: "",
     });
-
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             const email = data.user?.email || "";
@@ -114,6 +127,7 @@ export default function AdminDashboardPage() {
         setShowAddForm(false);
         setFilterArea("كل شبين القناطر وقراها");
         setFilterSpecialty("كل التخصصات");
+        setFilterProfession("كل المهن");
         setLoadingData(true);
         const { data } = await supabase
             .from(tab)
@@ -123,6 +137,7 @@ export default function AdminDashboardPage() {
         setItems(data || []);
         setLoadingData(false);
     };
+
     const handleDelete = async (id: string) => {
         const ok = window.confirm("هل أنت متأكد من حذف هذا العنصر نهائياً؟");
         if (!ok) return;
@@ -225,14 +240,18 @@ export default function AdminDashboardPage() {
     }
 
     const filteredItems = items.filter((item) => {
-        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""} ${item.specialty || ""}`.toLowerCase();
+        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""} ${item.specialty || ""} ${item.profession || ""}`.toLowerCase();
         const matchSearch = text.includes(searchQuery.toLowerCase());
         const matchArea = filterArea === "كل شبين القناطر وقراها" || item.area === filterArea;
         const matchSpec =
             activeTab !== "doctors" ||
             filterSpecialty === "كل التخصصات" ||
             item.specialty === filterSpecialty;
-        return matchSearch && matchArea && matchSpec;
+        const matchProf =
+            activeTab !== "craftsmen" ||
+            filterProfession === "كل المهن" ||
+            item.profession === filterProfession;
+        return matchSearch && matchArea && matchSpec && matchProf;
     });
 
     const addButtonLabel =
@@ -449,14 +468,15 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setCraftForm({ ...craftForm, name: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <input
-                            type="text"
-                            required
-                            placeholder="المهنة (سباك، كهربائي، نجار، نقاش...)"
+                        <select
                             value={craftForm.profession}
                             onChange={(e) => setCraftForm({ ...craftForm, profession: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {PROFESSIONS.map((p) => (
+                                <option key={p} value={p}>{p}</option>
+                            ))}
+                        </select>
                         <select
                             value={craftForm.area}
                             onChange={(e) => setCraftForm({ ...craftForm, area: e.target.value })}
@@ -479,7 +499,6 @@ export default function AdminDashboardPage() {
                         </button>
                     </form>
                 )}
-
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2 flex-1 min-w-[200px]">
@@ -513,6 +532,19 @@ export default function AdminDashboardPage() {
                                 <option value="كل التخصصات">كل التخصصات</option>
                                 {SPECIALTIES.map((s) => (
                                     <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        )}
+
+                        {activeTab === "craftsmen" && (
+                            <select
+                                value={filterProfession}
+                                onChange={(e) => setFilterProfession(e.target.value)}
+                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50"
+                            >
+                                <option value="كل المهن">كل المهن</option>
+                                {PROFESSIONS.map((p) => (
+                                    <option key={p} value={p}>{p}</option>
                                 ))}
                             </select>
                         )}
