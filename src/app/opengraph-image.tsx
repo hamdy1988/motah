@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "منصة مُتاح - دليل خدمات شبين القناطر وقراها";
+export const alt = "Motah - Shibin El Qanater Services Directory";
 export const size = {
     width: 1200,
     height: 630,
@@ -33,18 +33,18 @@ export default function Image() {
                         border: "2px solid rgba(255,255,255,0.25)",
                         borderRadius: "24px",
                         padding: "14px 36px",
-                        fontSize: 32,
+                        fontSize: 30,
                         fontWeight: 700,
                         marginBottom: "30px",
                     }}
                 >
-                    شبين القناطر وجميع القرى التابعة لها
+                    Shibin El Qanater &amp; Villages
                 </div>
-                <div style={{ fontSize: 96, fontWeight: 900, marginBottom: "20px" }}>
-                    مُتاح | Motah
+                <div style={{ fontSize: 108, fontWeight: 900, marginBottom: "20px" }}>
+                    Motah
                 </div>
-                <div style={{ fontSize: 38, color: "#e2e8f0", maxWidth: "900px" }}>
-                    عيادات • متاجر ومحلات • صنايعية وحرفيون • بيع وإيجار مباشر
+                <div style={{ fontSize: 34, color: "#e2e8f0" }}>
+                    Clinics • Stores • Craftsmen • Real Estate &amp; Cars
                 </div>
             </div>
         ),

@@ -19,11 +19,11 @@ export default function Icon() {
                     background: "linear-gradient(135deg, #0284c7 0%, #10b981 100%)",
                     borderRadius: "16px",
                     color: "white",
-                    fontSize: 38,
+                    fontSize: 40,
                     fontWeight: 900,
                 }}
             >
-                م
+                M
             </div>
         ),
         { ...size }
