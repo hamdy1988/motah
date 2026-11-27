@@ -6,53 +6,55 @@ interface LogoProps {
 
 export default function Logo({ lightText = false }: LogoProps) {
     return (
-        <div className="inline-flex items-center gap-2.5 select-none">
-            {/* أيقونة الشعار الهندسية */}
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-emerald-500 flex items-center justify-center shadow-md shadow-sky-600/20">
+        <div className="inline-flex items-center gap-3 select-none">
+            {/* أيقونة اللوجو رقم 2: حرف م الهندسي مع علامة الصح الخضراء */}
+            <div className="relative w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700/80 flex items-center justify-center shadow-md">
                 <svg
-                    viewBox="0 0 36 36"
+                    viewBox="0 0 44 44"
                     fill="none"
                     xmlns="http://w3.org"
-                    className="w-6 h-6"
+                    className="w-8 h-8"
                 >
-                    {/* إطار دبوس الموقع مع علامة التوفر */}
+                    {/* حرف م هندسي أبيض */}
                     <path
-                        d="M18 4C11.9249 4 7 8.92487 7 15C7 22.5 18 32 18 32C18 32 29 22.5 29 15C29 8.92487 24.0751 4 18 4Z"
+                        d="M14 33V21C14 15.5 18.2 11.5 23.5 11.5C28.8 11.5 32.5 15.2 32.5 20.2C32.5 24.8 29 27.5 24.5 27.5H19.5"
                         stroke="white"
-                        strokeWidth="2.6"
+                        strokeWidth="3.8"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
+                    {/* علامة التوفر / الصح الخضراء المتداخلة */}
                     <path
-                        d="M13.5 15.5L16.5 18.5L22.5 12.5"
-                        stroke="white"
-                        strokeWidth="2.8"
+                        d="M8.5 24.5L15.5 31.5L35.5 16.5"
+                        stroke="#10B981"
+                        strokeWidth="3.6"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
                 </svg>
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />
             </div>
 
-            {/* اسم المنصة */}
-            <div className="leading-tight">
+            {/* نص الشعار */}
+            <div className="leading-none">
                 <div className="flex items-center gap-1.5">
                     <span
-                        className={`text-xl font-extrabold tracking-tight ${lightText ? "text-white" : "text-slate-900"
+                        className={`text-2xl font-extrabold tracking-tight ${lightText ? "text-white" : "text-slate-900"
                             }`}
                     >
                         مُتاح
                     </span>
-                    <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-600">
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-xs font-extrabold text-emerald-500 tracking-wide">
                         Motah
                     </span>
+                    <span
+                        className={`text-[10px] font-medium ${lightText ? "text-slate-400" : "text-slate-500"
+                            }`}
+                    >
+                        • شبين القناطر
+                    </span>
                 </div>
-                <p
-                    className={`text-[11px] font-medium ${lightText ? "text-slate-400" : "text-slate-500"
-                        }`}
-                >
-                    شبين القناطر وقراها
-                </p>
             </div>
         </div>
     );
