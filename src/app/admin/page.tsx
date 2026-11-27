@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
+
 import { supabase } from "@/lib/supabase";
 import {
     ShieldCheck,
@@ -223,7 +225,13 @@ export default function AdminDashboardPage() {
                         </div>
                         <div>
                             <h1 className="text-xl font-extrabold flex items-center gap-2">
-                                <span>غرفة تحكم منصة مُتاح</span>
+                                <span>غرفة تحكم منصة مُتاح<div className="flex items-center gap-4">
+                                    <Logo lightText />
+                                    <span className="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-extrabold border border-emerald-500/30">
+                                        غرفة التحكم Admin
+                                    </span>
+                                </div>
+</span>
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300">Admin</span>
                             </h1>
                             <p className="text-xs text-slate-400">إدارة المحتوى، العيادات، والمتاجر في شبين القناطر</p>
