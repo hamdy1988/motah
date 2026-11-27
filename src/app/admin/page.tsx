@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
+import { SHIBIN_VILLAGES } from "@/lib/areas";
 import {
     Tag,
     Stethoscope,
@@ -19,15 +20,37 @@ import {
 
 const ADMIN_PHONE = "01063686679";
 
+const SPECIALTIES = [
+    "باطنة وجهاز هضمي",
+    "أطفال وحديثي الولادة",
+    "نساء وتوليد",
+    "عظام ومفاصل",
+    "أسنان",
+    "أنف وأذن وحنجرة",
+    "عيون ورمد",
+    "جلدية وتجميل",
+    "قلب وأوعية دموية",
+    "مخ وأعصاب",
+    "مسالك بولية",
+    "جراحة عامة ومناظير",
+    "صدر وجهاز تنفسي",
+    "علاج طبيعي وتأهيل",
+    "نفسية وعصبية",
+    "تغذية علاجية وسمنة",
+    "تحاليل وأشعة",
+    "صيدليات",
+    "تخصص آخر",
+];
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [activeTab, setActiveTab] = useState<"listings" | "doctors" | "stores" | "craftsmen">("listings");
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterArea, setFilterArea] = useState("كل شبين القناطر وقراها");
+    const [filterSpecialty, setFilterSpecialty] = useState("كل التخصصات");
 
     const [stats, setStats] = useState({ listings: 0, doctors: 0, stores: 0, craftsmen: 0, appointments: 0 });
     const [items, setItems] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(false);
-
     const [showAddForm, setShowAddForm] = useState(false);
 
     const [docForm, setDocForm] = useState({
@@ -89,16 +112,17 @@ export default function AdminDashboardPage() {
     const loadTabData = async (tab: "listings" | "doctors" | "stores" | "craftsmen") => {
         setActiveTab(tab);
         setShowAddForm(false);
+        setFilterArea("كل شبين القناطر وقراها");
+        setFilterSpecialty("كل التخصصات");
         setLoadingData(true);
         const { data } = await supabase
             .from(tab)
             .select("*")
             .order("created_at", { ascending: false })
-            .limit(50);
+            .limit(100);
         setItems(data || []);
         setLoadingData(false);
     };
-
     const handleDelete = async (id: string) => {
         const ok = window.confirm("هل أنت متأكد من حذف هذا العنصر نهائياً؟");
         if (!ok) return;
@@ -201,8 +225,14 @@ export default function AdminDashboardPage() {
     }
 
     const filteredItems = items.filter((item) => {
-        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""}`.toLowerCase();
-        return text.includes(searchQuery.toLowerCase());
+        const text = `${item.title || ""} ${item.doctor_name || ""} ${item.name || ""} ${item.area || ""} ${item.specialty || ""}`.toLowerCase();
+        const matchSearch = text.includes(searchQuery.toLowerCase());
+        const matchArea = filterArea === "كل شبين القناطر وقراها" || item.area === filterArea;
+        const matchSpec =
+            activeTab !== "doctors" ||
+            filterSpecialty === "كل التخصصات" ||
+            item.specialty === filterSpecialty;
+        return matchSearch && matchArea && matchSpec;
     });
 
     const addButtonLabel =
@@ -242,7 +272,6 @@ export default function AdminDashboardPage() {
                     </Link>
                 </div>
             </div>
-
             <div className="max-w-6xl mx-auto px-4 -mt-4">
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
                     {[
@@ -274,8 +303,8 @@ export default function AdminDashboardPage() {
                                     key={tab.key}
                                     onClick={() => loadTabData(tab.key as any)}
                                     className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition ${isActive
-                                            ? "bg-slate-900 text-white shadow-sm"
-                                            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                                        ? "bg-slate-900 text-white shadow-sm"
+                                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -295,6 +324,7 @@ export default function AdminDashboardPage() {
                         </button>
                     )}
                 </div>
+
                 {activeTab === "doctors" && showAddForm && (
                     <form onSubmit={handleAddDoctor} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
@@ -305,22 +335,24 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setDocForm({ ...docForm, doctor_name: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <input
-                            type="text"
-                            required
-                            placeholder="التخصص (مثال: أطفال وحديثي الولادة)"
+                        <select
                             value={docForm.specialty}
                             onChange={(e) => setDocForm({ ...docForm, specialty: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
-                        <input
-                            type="text"
-                            required
-                            placeholder="المنطقة / القرية"
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {SPECIALTIES.map((s) => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                        <select
                             value={docForm.area}
                             onChange={(e) => setDocForm({ ...docForm, area: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {SHIBIN_VILLAGES.filter((v) => v !== "كل شبين القناطر وقراها").map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
                         <input
                             type="text"
                             required
@@ -358,7 +390,6 @@ export default function AdminDashboardPage() {
                         </button>
                     </form>
                 )}
-
                 {activeTab === "stores" && showAddForm && (
                     <form onSubmit={handleAddStore} className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
@@ -377,14 +408,15 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setStoreForm({ ...storeForm, category: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <input
-                            type="text"
-                            required
-                            placeholder="المنطقة / القرية"
+                        <select
                             value={storeForm.area}
                             onChange={(e) => setStoreForm({ ...storeForm, area: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {SHIBIN_VILLAGES.filter((v) => v !== "كل شبين القناطر وقراها").map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
                         <input
                             type="text"
                             required
@@ -425,14 +457,15 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setCraftForm({ ...craftForm, profession: e.target.value })}
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
                         />
-                        <input
-                            type="text"
-                            required
-                            placeholder="المنطقة / القرية"
+                        <select
                             value={craftForm.area}
                             onChange={(e) => setCraftForm({ ...craftForm, area: e.target.value })}
-                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                        />
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {SHIBIN_VILLAGES.filter((v) => v !== "كل شبين القناطر وقراها").map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
                         <input
                             type="tel"
                             required
@@ -448,15 +481,41 @@ export default function AdminDashboardPage() {
                 )}
 
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-slate-100 flex items-center gap-2">
-                        <Search className="w-4 h-4 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="ابحث بالاسم أو العنوان أو المنطقة..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full text-sm focus:outline-none"
-                        />
+                    <div className="p-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                            <Search className="w-4 h-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="ابحث بالاسم أو العنوان أو المنطقة..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full text-sm focus:outline-none"
+                            />
+                        </div>
+
+                        <select
+                            value={filterArea}
+                            onChange={(e) => setFilterArea(e.target.value)}
+                            className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50"
+                        >
+                            <option value="كل شبين القناطر وقراها">كل شبين القناطر وقراها</option>
+                            {SHIBIN_VILLAGES.filter((v) => v !== "كل شبين القناطر وقراها").map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
+
+                        {activeTab === "doctors" && (
+                            <select
+                                value={filterSpecialty}
+                                onChange={(e) => setFilterSpecialty(e.target.value)}
+                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50"
+                            >
+                                <option value="كل التخصصات">كل التخصصات</option>
+                                {SPECIALTIES.map((s) => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     {loadingData ? (
@@ -476,13 +535,15 @@ export default function AdminDashboardPage() {
                                             {item.title || item.doctor_name || item.name}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            {item.area} {item.specialty ? `• ${item.specialty}` : ""} {item.category ? `• ${item.category}` : ""} {item.profession ? `• ${item.profession}` : ""} {item.phone ? `• ${item.phone}` : ""}
+                                            {item.specialty || item.category || item.profession || ""}
+                                            {item.area ? ` • ${item.area}` : ""}
+                                            {item.phone ? ` • ${item.phone}` : ""}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => handleDelete(item.id)}
-                                        className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition"
-                                        title="حذف نهائي"
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition"
+                                        title="حذف"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
