@@ -222,38 +222,46 @@ export default function HomePage() {
         </div>
       </section>
       <main id="market-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { id: "all", label: "الكل" },
-                { id: "sale", label: "للبيع" },
-                { id: "rent", label: "للإيجار" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedType(tab.id as "all" | "sale" | "rent")}
-                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition ${selectedType === tab.id
-                      ? "bg-slate-900 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: "all", label: "الكل" },
+              { id: "sale", label: "للبيع" },
+              { id: "rent", label: "للإيجار" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedType(tab.id as "all" | "sale" | "rent")}
+                className={`px-5 py-2 rounded-xl text-sm font-bold transition ${selectedType === tab.id
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
+            <div className="md:col-span-4 relative flex items-center">
+              <Search className="w-5 h-5 text-slate-400 absolute right-3" />
+              <input
+                type="text"
+                placeholder="اكتب ما تبحث عنه..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pr-10 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600">
-                <Filter className="w-3.5 h-3.5 text-emerald-600" />
-                القسم:
-              </span>
+            <div className="md:col-span-3 relative flex items-center">
+              <Filter className="w-4 h-4 text-emerald-600 absolute right-3" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full pr-9 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                <option value="all">جميع الأقسام (20 قسماً)</option>
+                <option value="all">جميع الأقسام</option>
                 {LISTING_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -261,49 +269,13 @@ export default function HomePage() {
                 ))}
               </select>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${selectedCategory === "all"
-                  ? "bg-emerald-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-            >
-              جميع الأقسام
-            </button>
-            {LISTING_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${selectedCategory === cat
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            <div className="md:col-span-7 relative flex items-center">
-              <Search className="w-5 h-5 text-slate-400 absolute right-3" />
-              <input
-                type="text"
-                placeholder="ابحث عن شقة، سيارة، محل، وظيفة، أو أي غرض..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-10 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-
-            <div className="md:col-span-5 relative flex items-center">
-              <MapPin className="w-5 h-5 text-emerald-600 absolute right-3" />
+            <div className="md:col-span-3 relative flex items-center">
+              <MapPin className="w-4 h-4 text-emerald-600 absolute right-3" />
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full pr-10 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full pr-9 pl-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 {SHIBIN_AREAS.map((area) => (
                   <option key={area} value={area}>
@@ -312,9 +284,22 @@ export default function HomePage() {
                 ))}
               </select>
             </div>
+
+            <div className="md:col-span-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById("listings-results");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="w-full h-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-sm flex items-center justify-center gap-2 transition"
+              >
+                <Search className="w-4 h-4" />
+                <span>بحث</span>
+              </button>
+            </div>
           </div>
         </div>
-
         <div className="rounded-2xl bg-gradient-to-l from-emerald-600 via-teal-700 to-slate-900 p-5 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3.5 text-center sm:text-right">
             <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-white/15 items-center justify-center shrink-0">
@@ -338,7 +323,7 @@ export default function HomePage() {
             ميّز إعلانك الآن
           </a>
         </div>
-        <div>
+        <div id="listings-results">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-emerald-600" />
