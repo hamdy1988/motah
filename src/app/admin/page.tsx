@@ -66,6 +66,15 @@ const STORE_CATEGORIES = [
     "مكتبات وأدوات مدرسية",
     "محلات أخرى",
 ];
+
+const LISTING_CATEGORIES = [
+    "عقارات",
+    "سيارات وموتوسيكلات",
+    "موبايلات وإلكترونيات",
+    "أثاث وأجهزة منزلية",
+    "معدات وآلات",
+    "أخرى",
+];
 export default function AdminDashboardPage() {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [activeTab, setActiveTab] = useState<"listings" | "doctors" | "stores" | "craftsmen">("listings");
@@ -79,6 +88,18 @@ export default function AdminDashboardPage() {
     const [items, setItems] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(false);
     const [showAddForm, setShowAddForm] = useState(false);
+
+    const [listingForm, setListingForm] = useState({
+        title: "",
+        description: "",
+        listing_type: "sale" as "sale" | "rent",
+        category: "عقارات",
+        price: 0,
+        rent_period: "شهرياً",
+        area: "مدينة شبين القناطر",
+        phone: "",
+        image_url: "https://unsplash.com",
+    });
 
     const [docForm, setDocForm] = useState({
         doctor_name: "",
@@ -164,6 +185,37 @@ export default function AdminDashboardPage() {
             alert("حدث خطأ أثناء الحذف: " + error.message);
         }
     };
+    const handleAddListing = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const { error } = await supabase.from("listings").insert({
+            user_id: userData.user.id,
+            title: listingForm.title,
+            description: listingForm.description,
+            listing_type: listingForm.listing_type,
+            category: listingForm.category,
+            price: Number(listingForm.price),
+            rent_period: listingForm.listing_type === "rent" ? listingForm.rent_period : null,
+            area: listingForm.area,
+            phone: listingForm.phone,
+            specs: [],
+            image_url: listingForm.image_url,
+            is_verified: true,
+        });
+
+        if (!error) {
+            alert("تم نشر الإعلان بنجاح!");
+            setShowAddForm(false);
+            setListingForm({ ...listingForm, title: "", description: "", phone: "", price: 0 });
+            loadAllStats();
+            loadTabData("listings");
+        } else {
+            alert("خطأ في إضافة الإعلان: " + error.message);
+        }
+    };
+
     const handleAddDoctor = async (e: React.FormEvent) => {
         e.preventDefault();
         const { data: userData } = await supabase.auth.getUser();
@@ -272,13 +324,15 @@ export default function AdminDashboardPage() {
     });
 
     const addButtonLabel =
-        activeTab === "doctors"
-            ? "إضافة طبيب جديد"
-            : activeTab === "stores"
-                ? "إضافة متجر جديد"
-                : activeTab === "craftsmen"
-                    ? "إضافة صنايعي جديد"
-                    : "";
+        activeTab === "listings"
+            ? "إضافة إعلان جديد"
+            : activeTab === "doctors"
+                ? "إضافة طبيب جديد"
+                : activeTab === "stores"
+                    ? "إضافة متجر جديد"
+                    : activeTab === "craftsmen"
+                        ? "إضافة صنايعي جديد"
+                        : "";
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
@@ -361,6 +415,77 @@ export default function AdminDashboardPage() {
                     )}
                 </div>
 
+                {activeTab === "listings" && showAddForm && (
+                    <form onSubmit={handleAddListing} className="bg-white p-6 rounded-2xl border border-sky-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            required
+                            placeholder="عنوان الإعلان (مثال: شقة للإيجار بشارع بورسعيد)"
+                            value={listingForm.title}
+                            onChange={(e) => setListingForm({ ...listingForm, title: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm sm:col-span-2"
+                        />
+                        <select
+                            value={listingForm.listing_type}
+                            onChange={(e) => setListingForm({ ...listingForm, listing_type: e.target.value as "sale" | "rent" })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            <option value="sale">للبيع</option>
+                            <option value="rent">للإيجار</option>
+                        </select>
+                        <select
+                            value={listingForm.category}
+                            onChange={(e) => setListingForm({ ...listingForm, category: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {LISTING_CATEGORIES.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={listingForm.area}
+                            onChange={(e) => setListingForm({ ...listingForm, area: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
+                        >
+                            {SHIBIN_VILLAGES.filter((v) => v !== "كل شبين القناطر وقراها").map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
+                        <input
+                            type="number"
+                            required
+                            placeholder="السعر بالجنيه"
+                            value={listingForm.price || ""}
+                            onChange={(e) => setListingForm({ ...listingForm, price: Number(e.target.value) })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="tel"
+                            required
+                            placeholder="رقم الهاتف للتواصل"
+                            value={listingForm.phone}
+                            onChange={(e) => setListingForm({ ...listingForm, phone: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
+                        />
+                        <input
+                            type="url"
+                            placeholder="رابط صورة الإعلان (اختياري)"
+                            value={listingForm.image_url}
+                            onChange={(e) => setListingForm({ ...listingForm, image_url: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm sm:col-span-2"
+                        />
+                        <input
+                            type="text"
+                            placeholder="وصف وتفاصيل الإعلان"
+                            value={listingForm.description}
+                            onChange={(e) => setListingForm({ ...listingForm, description: e.target.value })}
+                            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm sm:col-span-2"
+                        />
+                        <button type="submit" className="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl py-2.5 text-sm">
+                            نشر الإعلان
+                        </button>
+                    </form>
+                )}
                 {activeTab === "doctors" && showAddForm && (
                     <form onSubmit={handleAddDoctor} className="bg-white p-6 rounded-2xl border border-teal-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
@@ -426,6 +551,7 @@ export default function AdminDashboardPage() {
                         </button>
                     </form>
                 )}
+
                 {activeTab === "stores" && showAddForm && (
                     <form onSubmit={handleAddStore} className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
