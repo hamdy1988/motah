@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
+import { LISTING_CATEGORIES } from "@/lib/categories";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import Logo from "@/components/Logo";
 import {
   Search,
@@ -25,28 +27,6 @@ import {
 
 const SHIBIN_AREAS = ["كل شبين القناطر وقراها", ...SHIBIN_VILLAGES];
 
-export const LISTING_CATEGORIES = [
-  "عقارات وأراضي",
-  "شقق ومحلات للإيجار",
-  "سيارات ومركبات",
-  "موتوسيكلات وتروسيكلات وتكاتك",
-  "قطع غيار وإكسسوارات سيارات",
-  "موبايلات وتابلت",
-  "كمبيوتر ولابتوب وإلكترونيات",
-  "أثاث ومفروشات منزلية",
-  "أجهزة كهربائية ومنزلية",
-  "وظائف وفرص عمل",
-  "تعليم ودروس خصوصية",
-  "معدات وآلات صناعية",
-  "معدات زراعية ومواشي وطيور",
-  "ملابس وأحذية وإكسسوارات",
-  "مستلزمات أطفال وألعاب",
-  "مستلزمات طبية وتجميل",
-  "رياضة وهوايات",
-  "كتب وأدوات مكتبية",
-  "خدمات ونقل عفش",
-  "أقسام أخرى",
-];
 interface Listing {
   id: string;
   title: string;
@@ -60,7 +40,6 @@ interface Listing {
   image_url: string;
   is_verified: boolean;
 }
-
 export default function HomePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,6 +139,7 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
       <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-semibold mb-4">
@@ -300,6 +280,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
         <div className="rounded-2xl bg-gradient-to-l from-emerald-600 via-teal-700 to-slate-900 p-5 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3.5 text-center sm:text-right">
             <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-white/15 items-center justify-center shrink-0">
@@ -315,14 +296,16 @@ export default function HomePage() {
             </div>
           </div>
           <a
-            href="https://whatsapp.com"
+            href={getWhatsAppUrl(
+              "01006439574",
+              "مرحباً إدارة منصة مُتاح، أرغب في تمييز إعلاني أو إضافة متجري/عيادتي."
+            )}
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-sm"
           >
             ميّز إعلانك الآن
           </a>
-
         </div>
         <div id="listings-results">
           <div className="flex items-center justify-between mb-6">
@@ -404,6 +387,7 @@ export default function HomePage() {
                           ج.م {item.listing_type === "rent" && item.rent_period ? `/ ${item.rent_period}` : ""}
                         </span>
                       </p>
+
                       <div className="grid grid-cols-2 gap-2">
                         <a
                           href={`tel:${item.phone}`}
@@ -413,7 +397,10 @@ export default function HomePage() {
                           <span>اتصال</span>
                         </a>
                         <a
-                          href={`https://wa.me{item.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`مرحباً، بخصوص إعلانك "${item.title}" على منصة مُتاح`)}`}
+                          href={getWhatsAppUrl(
+                            item.phone,
+                            `مرحباً، بخصوص إعلانك "${item.title}"`
+                          )}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition"

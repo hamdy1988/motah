@@ -8,7 +8,7 @@ export function getWhatsAppUrl(phone: string, text?: string): string {
         formatted = cleaned.slice(2);
     }
 
-    const base = "https://wa.me" + formatted;
+    const base = "https://wa.me/" + formatted;
 
     const defaultSignature =
         "مرحباً، تواصلت معكم عبر منصة مُتاح (دليل شبين القناطر وقراها).";
