@@ -315,13 +315,14 @@ export default function HomePage() {
             </div>
           </div>
           <a
-            href={"https://wa.me" + encodeURIComponent("مرحباً إدارة منصة مُتاح، أرغب في تمييز إعلاني أو إضافة متجري/عيادتي.")}
+            href="https://whatsapp.com"
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-sm"
           >
             ميّز إعلانك الآن
           </a>
+
         </div>
         <div id="listings-results">
           <div className="flex items-center justify-between mb-6">
