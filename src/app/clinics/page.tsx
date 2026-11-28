@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
+
 import {
     ArrowRight,
     Stethoscope,
@@ -436,7 +438,7 @@ export default function ClinicsPage() {
                                             <span>اتصال</span>
                                         </a>
                                         <a
-                                            href={`https://wa.me{doc.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`مرحباً عيادة ${doc.doctor_name}، أتواصل معكم عبر منصة مُتاح`)}`}
+                                            href={getWhatsAppUrl(doc.phone, `مرحباً عيادة ${doc.doctor_name}`)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition"
