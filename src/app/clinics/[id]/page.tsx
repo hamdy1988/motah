@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import {
     ArrowRight,
     MapPin,
@@ -14,6 +15,8 @@ import {
     CheckCircle2,
     Loader2,
     RotateCcw,
+    Lock,
+    MessageCircle,
 } from "lucide-react";
 
 interface DoctorDetail {
@@ -27,6 +30,7 @@ interface DoctorDetail {
     fee: number;
     working_hours: string;
     current_serving_number: number;
+    subscription_ends_at?: string | null;
 }
 
 interface AppointmentItem {
@@ -37,7 +41,6 @@ interface AppointmentItem {
     queue_number: number;
     status: string;
 }
-
 export default function SingleClinicPage() {
     const params = useParams();
     const id = params?.id as string;
@@ -53,6 +56,7 @@ export default function SingleClinicPage() {
     const [patientPhone, setPatientPhone] = useState("");
     const [booking, setBooking] = useState(false);
     const [bookedNumber, setBookedNumber] = useState<number | null>(null);
+
     const fetchClinicData = async (dateValue = selectedDate, uid = currentUserId) => {
         if (!id) return;
         const { data: docData } = await supabase
@@ -93,7 +97,6 @@ export default function SingleClinicPage() {
             fetchClinicData(selectedDate, uid);
         });
     }, [id, selectedDate]);
-
     const handleBook = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!doctor) return;
@@ -181,7 +184,61 @@ export default function SingleClinicPage() {
     }
 
     const isDoctorOwner = Boolean(currentUserId && currentUserId === doctor.user_id);
+    const isSubscribed = doctor.subscription_ends_at
+        ? new Date(doctor.subscription_ends_at) > new Date()
+        : false;
 
+    if (!isSubscribed) {
+        return (
+            <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-sm">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-xl font-extrabold text-slate-900 mb-2">
+                        {isDoctorOwner
+                            ? "انتهت فترة الاشتراك الشهري للعيادة"
+                            : "الحجز الأونلاين متوقف مؤقتاً"}
+                    </h1>
+                    <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+                        {isDoctorOwner
+                            ? `مرحباً ${doctor.doctor_name}، انتهت صلاحية الاشتراك الشهري لسيستم الحجز وإدارة الأدوار. لتجديد الاشتراك وتفعيل الخدمة فوراً يرجى التواصل مع إدارة منصة مُتاح.`
+                            : `نظام الحجز الإلكتروني لعيادة ${doctor.doctor_name} متوقف حالياً. يمكنك التواصل مع العيادة مباشرة عبر الهاتف.`}
+                    </p>
+
+                    {isDoctorOwner ? (
+                        <a
+                            href={getWhatsAppUrl(
+                                "01006439574",
+                                `مرحباً إدارة منصة مُتاح، أرغب في تجديد الاشتراك الشهري لعيادة: ${doctor.doctor_name}`
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition mb-3"
+                        >
+                            <MessageCircle className="w-4 h-4" />
+                            <span>تواصل مع الإدارة عبر واتساب للتجديد</span>
+                        </a>
+                    ) : (
+                        <a
+                            href={`tel:${doctor.phone}`}
+                            className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition mb-3"
+                        >
+                            <Phone className="w-4 h-4" />
+                            <span>اتصال بالعيادة: {doctor.phone}</span>
+                        </a>
+                    )}
+
+                    <Link
+                        href="/clinics"
+                        className="inline-block text-xs font-bold text-slate-500 hover:text-slate-800 mt-2"
+                    >
+                        العودة لدليل العيادات
+                    </Link>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="min-h-screen bg-slate-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
@@ -220,7 +277,7 @@ export default function SingleClinicPage() {
                                 {doctor.current_serving_number}
                             </p>
                             <p className="text-xs text-slate-400 mt-1">
-                                حجوزات يوم {selectedDate}: {appointments.length}
+                                حجوزات يوم {selectedDate}
                             </p>
                         </div>
                     </div>
@@ -228,19 +285,16 @@ export default function SingleClinicPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                        <h2 className="text-lg font-extrabold text-slate-900 mb-1 flex items-center gap-2">
+                        <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2 mb-4">
                             <CalendarCheck className="w-5 h-5 text-sky-600" />
-                            <span>احجز دورك في العيادة</span>
+                            <span>احجز دورك في الكشف</span>
                         </h2>
-                        <p className="text-xs text-slate-500 mb-5">
-                            اختر يوم الكشف وسجل اسمك ورقمك للحصول على دورك فوراً
-                        </p>
 
-                        {bookedNumber && (
-                            <div className="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-                                <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto mb-1" />
-                                <p className="text-sm font-bold text-emerald-900">
-                                    تم تأكيد حجزك ليوم {selectedDate} بنجاح!
+                        {bookedNumber !== null && (
+                            <div className="mb-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+                                <p className="text-sm font-extrabold text-emerald-800 flex items-center justify-center gap-1">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>تم تأكيد حجزك بنجاح!</span>
                                 </p>
                                 <p className="text-xs text-emerald-700 mt-1">رقم دورك في الكشف هو:</p>
                                 <p className="text-3xl font-extrabold text-emerald-700 mt-1">
@@ -352,11 +406,10 @@ export default function SingleClinicPage() {
                                     return (
                                         <div
                                             key={app.id}
-                                            className={`p-3 rounded-xl border flex items-center justify-between ${
-                                                isDone
+                                            className={`p-3 rounded-xl border flex items-center justify-between ${isDone
                                                     ? "bg-slate-50 border-slate-200 opacity-60"
                                                     : "bg-white border-slate-200"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 font-extrabold text-sm flex items-center justify-center">
@@ -375,11 +428,10 @@ export default function SingleClinicPage() {
                                                 </div>
                                             </div>
                                             <span
-                                                className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                                                    isDone
+                                                className={`text-xs font-bold px-2.5 py-1 rounded-lg ${isDone
                                                         ? "bg-slate-200 text-slate-600"
-                                                        : "bg-amber-50 text-amber-700"
-                                                }`}
+                                                        : "bg-emerald-50 text-emerald-700"
+                                                    }`}
                                             >
                                                 {isDone ? "تم الكشف" : "في الانتظار"}
                                             </span>

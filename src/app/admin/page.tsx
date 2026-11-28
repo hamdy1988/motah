@@ -17,6 +17,7 @@ import {
     Loader2,
     Lock,
     Search,
+    CalendarPlus,
 } from "lucide-react";
 
 const ADMIN_PHONE = "01063686679";
@@ -165,6 +166,24 @@ export default function AdminDashboardPage() {
         setLoadingData(false);
     };
 
+    const handleRenewDoctor = async (doc: any) => {
+        const currentEnd = doc.subscription_ends_at ? new Date(doc.subscription_ends_at) : new Date();
+        const baseDate = currentEnd > new Date() ? currentEnd : new Date();
+        const newEnd = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+        const { error } = await supabase
+            .from("doctors")
+            .update({ subscription_ends_at: newEnd })
+            .eq("id", doc.id);
+
+        if (!error) {
+            alert(`تم تجديد اشتراك ${doc.doctor_name} لمدة 30 يوماً بنجاح!`);
+            loadTabData("doctors");
+        } else {
+            alert("حدث خطأ أثناء التجديد: " + error.message);
+        }
+    };
+
     const handleDelete = async (id: string) => {
         const ok = window.confirm("هل أنت متأكد من حذف هذا العنصر نهائياً؟");
         if (!ok) return;
@@ -213,14 +232,17 @@ export default function AdminDashboardPage() {
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) return;
 
+        const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
         const { error } = await supabase.from("doctors").insert({
             ...docForm,
             user_id: userData.user.id,
             current_serving_number: 0,
+            subscription_ends_at: nextMonth,
         });
 
         if (!error) {
-            alert("تمت إضافة العيادة بنجاح!");
+            alert("تمت إضافة العيادة وتفعيل اشتراك 30 يوماً بنجاح!");
             setShowAddForm(false);
             setDocForm({ ...docForm, doctor_name: "", address: "", phone: "" });
             loadAllStats();
@@ -340,7 +362,7 @@ export default function AdminDashboardPage() {
                                 </span>
                             </h1>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                إدارة المحتوى، العيادات، والمتاجر في شبين القناطر
+                                إدارة المحتوى، الاشتراكات، والمتاجر في شبين القناطر
                             </p>
                         </div>
                     </div>
@@ -539,7 +561,7 @@ export default function AdminDashboardPage() {
                             className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm sm:col-span-2"
                         />
                         <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-2.5 text-sm">
-                            حفظ العيادة
+                            حفظ العيادة (+30 يوم)
                         </button>
                     </form>
                 )}
@@ -722,27 +744,61 @@ export default function AdminDashboardPage() {
                         </div>
                     ) : (
                         <div className="divide-y divide-slate-100">
-                            {filteredItems.map((item) => (
-                                <div key={item.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50">
-                                    <div>
-                                        <p className="font-bold text-slate-900 text-sm">
-                                            {item.title || item.doctor_name || item.name}
-                                        </p>
-                                        <p className="text-xs text-slate-500 mt-0.5">
-                                            {item.specialty || item.category || item.profession || ""}
-                                            {item.area ? ` • ${item.area}` : ""}
-                                            {item.phone ? ` • ${item.phone}` : ""}
-                                        </p>
+                            {filteredItems.map((item) => {
+                                let daysLeft = 0;
+                                if (activeTab === "doctors" && item.subscription_ends_at) {
+                                    const diff = new Date(item.subscription_ends_at).getTime() - Date.now();
+                                    daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                                }
+
+                                return (
+                                    <div key={item.id} className="p-4 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-50">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-bold text-slate-900 text-sm">
+                                                    {item.title || item.doctor_name || item.name}
+                                                </p>
+                                                {activeTab === "doctors" && (
+                                                    <span
+                                                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${daysLeft > 0
+                                                                ? "bg-emerald-50 text-emerald-700"
+                                                                : "bg-red-50 text-red-600"
+                                                            }`}
+                                                    >
+                                                        {daysLeft > 0 ? `متبقي ${daysLeft} يوم` : "منتهي الاشتراك"}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                {item.specialty || item.category || item.profession || ""}
+                                                {item.area ? ` • ${item.area}` : ""}
+                                                {item.phone ? ` • ${item.phone}` : ""}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            {activeTab === "doctors" && (
+                                                <button
+                                                    onClick={() => handleRenewDoctor(item)}
+                                                    className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-extrabold flex items-center gap-1 transition"
+                                                    title="تجديد الاشتراك الشهري 30 يوماً"
+                                                >
+                                                    <CalendarPlus className="w-3.5 h-3.5" />
+                                                    <span>تجديد +30 يوم</span>
+                                                </button>
+                                            )}
+
+                                            <button
+                                                onClick={() => handleDelete(item.id)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition"
+                                                title="حذف"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={() => handleDelete(item.id)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition"
-                                        title="حذف"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

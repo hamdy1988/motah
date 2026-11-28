@@ -5,7 +5,6 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { SHIBIN_VILLAGES } from "@/lib/areas";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
-
 import {
     ArrowRight,
     Stethoscope,
@@ -19,6 +18,7 @@ import {
     Phone,
     MessageCircle,
     Image as ImageIcon,
+    Lock,
 } from "lucide-react";
 
 const SPECIALTIES = [
@@ -54,6 +54,7 @@ interface DoctorItem {
     working_hours: string;
     current_serving_number: number;
     image_url?: string | null;
+    subscription_ends_at?: string | null;
 }
 export default function ClinicsPage() {
     const [doctors, setDoctors] = useState<DoctorItem[]>([]);
@@ -102,12 +103,12 @@ export default function ClinicsPage() {
             const fileExt = imageFile.name.split(".").pop();
             const fileName = `doctor-${userId}-${Date.now()}.${fileExt}`;
             const { error: uploadError } = await supabase.storage
-                .from("listings")
+                .from("listings-images")
                 .upload(fileName, imageFile);
 
             if (!uploadError) {
                 const { data: publicUrlData } = supabase.storage
-                    .from("listings")
+                    .from("listings-images")
                     .getPublicUrl(fileName);
                 uploadedImageUrl = publicUrlData.publicUrl;
             }
@@ -127,7 +128,7 @@ export default function ClinicsPage() {
 
         setSubmitting(false);
         if (!error) {
-            alert("تم تسجيل العيادة ونشرها بنجاح!");
+            alert("تم تسجيل العيادة ونشرها بنجاح! لديك فترة تجريبية مجانية لمدة 14 يوماً.");
             setShowForm(false);
             setDoctorName("");
             setAddress("");
@@ -244,7 +245,7 @@ export default function ClinicsPage() {
                                 <input
                                     type="text"
                                     required
-                                    placeholder="مثال: شارع بورسعيد - برج الأطباء - الدور الثاني"
+                                    placeholder="مثال: شارع بورسعيد - برج الأطباء"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
@@ -305,10 +306,10 @@ export default function ClinicsPage() {
                                         type="file"
                                         accept="image/*"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                setImageFile(file);
-                                                setImagePreview(URL.createObjectURL(file));
+                                            const files = e.target.files;
+                                            if (files && files.length > 0) {
+                                                setImageFile(files[0]);
+                                                setImagePreview(URL.createObjectURL(files[0]));
                                             }
                                         }}
                                         className="text-xs text-slate-600 file:ml-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer"
@@ -371,85 +372,103 @@ export default function ClinicsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredDoctors.map((doc) => (
-                            <div
-                                key={doc.id}
-                                className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                            >
-                                <div>
-                                    <div className="flex items-center gap-3.5 mb-4">
-                                        {doc.image_url ? (
-                                            <img
-                                                src={doc.image_url}
-                                                alt={doc.doctor_name}
-                                                className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0"
-                                            />
+                        {filteredDoctors.map((doc) => {
+                            const isSubscribed = doc.subscription_ends_at
+                                ? new Date(doc.subscription_ends_at) > new Date()
+                                : false;
+
+                            return (
+                                <div
+                                    key={doc.id}
+                                    className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                                >
+                                    <div>
+                                        <div className="flex items-center gap-3.5 mb-4">
+                                            {doc.image_url ? (
+                                                <img
+                                                    src={doc.image_url}
+                                                    alt={doc.doctor_name}
+                                                    className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0"
+                                                />
+                                            ) : (
+                                                <div className="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                                                    <Stethoscope className="w-8 h-8" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <span className="inline-block px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 text-xs font-bold mb-1">
+                                                    {doc.specialty}
+                                                </span>
+                                                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">
+                                                    {doc.doctor_name}
+                                                </h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 text-xs text-slate-600 mb-4">
+                                            <p className="flex items-center gap-1.5">
+                                                <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+                                                <span>{doc.area} - {doc.address}</span>
+                                            </p>
+                                            <p className="flex items-center gap-1.5">
+                                                <Clock className="w-4 h-4 text-sky-600 shrink-0" />
+                                                <span>{doc.working_hours}</span>
+                                            </p>
+                                            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                                                <span className="font-bold text-slate-800">
+                                                    الكشف: <span className="text-sky-700">{doc.fee} ج.م</span>
+                                                </span>
+                                                {isSubscribed && (
+                                                    <span className="inline-flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                                                        <Users className="w-3.5 h-3.5" />
+                                                        الدور الحالي: {doc.current_serving_number || 0}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 pt-3 border-t border-slate-100">
+                                        {isSubscribed ? (
+                                            <Link
+                                                href={`/clinics/${doc.id}`}
+                                                className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
+                                            >
+                                                <CalendarCheck className="w-4 h-4" />
+                                                <span>احجز دورك أونلاين</span>
+                                            </Link>
                                         ) : (
-                                            <div className="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                                                <Stethoscope className="w-8 h-8" />
+                                            <div className="w-full py-2.5 px-4 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed">
+                                                <Lock className="w-3.5 h-3.5" />
+                                                <span>الحجز الأونلاين متوقف مؤقتاً</span>
                                             </div>
                                         )}
-                                        <div>
-                                            <span className="inline-block px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 text-xs font-bold mb-1">
-                                                {doc.specialty}
-                                            </span>
-                                            <h3 className="font-extrabold text-slate-900 text-lg leading-snug">
-                                                {doc.doctor_name}
-                                            </h3>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-2 text-xs text-slate-600 mb-4">
-                                        <p className="flex items-center gap-1.5">
-                                            <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
-                                            <span>{doc.area} - {doc.address}</span>
-                                        </p>
-                                        <p className="flex items-center gap-1.5">
-                                            <Clock className="w-4 h-4 text-sky-600 shrink-0" />
-                                            <span>{doc.working_hours}</span>
-                                        </p>
-                                        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                                            <span className="font-bold text-slate-800">
-                                                الكشف: <span className="text-sky-700">{doc.fee} ج.م</span>
-                                            </span>
-                                            <span className="inline-flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
-                                                <Users className="w-3.5 h-3.5" />
-                                                الدور الحالي: {doc.current_serving_number || 0}
-                                            </span>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <a
+                                                href={`tel:${doc.phone}`}
+                                                className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition"
+                                            >
+                                                <Phone className="w-3.5 h-3.5" />
+                                                <span>اتصال</span>
+                                            </a>
+                                            <a
+                                                href={getWhatsAppUrl(
+                                                    doc.phone,
+                                                    `مرحباً عيادة ${doc.doctor_name}`
+                                                )}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition"
+                                            >
+                                                <MessageCircle className="w-3.5 h-3.5" />
+                                                <span>واتساب</span>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div className="space-y-2 pt-3 border-t border-slate-100">
-                                    <Link
-                                        href={`/clinics/${doc.id}`}
-                                        className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
-                                    >
-                                        <CalendarCheck className="w-4 h-4" />
-                                        <span>احجز دورك أونلاين</span>
-                                    </Link>
-
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <a
-                                            href={`tel:${doc.phone}`}
-                                            className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition"
-                                        >
-                                            <Phone className="w-3.5 h-3.5" />
-                                            <span>اتصال</span>
-                                        </a>
-                                        <a
-                                            href={getWhatsAppUrl(doc.phone, `مرحباً عيادة ${doc.doctor_name}`)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition"
-                                        >
-                                            <MessageCircle className="w-3.5 h-3.5" />
-                                            <span>واتساب</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
